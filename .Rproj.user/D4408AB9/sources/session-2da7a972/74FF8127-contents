@@ -1,0 +1,52 @@
+#' Calculate k_loss for all peptides on the basis of normalized light intensities
+#'
+#' A wrapper to apply getNLImod to all peptides of the dataset.
+#'
+#' @param e a pSILAC object.
+#' @param startIntensity character; either "model" (fit the model with an intersect), "max" (use maximum H+L intensitiy as intersect), or "median" (use median of non-null H+L intensities). Default "median".
+#' @param ncores the number of cores to use (defaults to detected cores minus 1)
+#'
+#' @return The updated pSILAC object.
+#'
+#' @export
+calcNLIkloss <- function(e, startIntensity="median", ncores=NULL){
+  if(class(e) != "pSILAC")	stop("e should be a pSILAC object.")
+  if(!all(c("NLI","NCS") %in% names(e))){
+    message("Light channel not yet normalized; performing linear normalization...")
+    e <- normalizeLightChannel(e,method="linear")
+    message("Done; now fitting model on each peptide...")
+  }
+  startIntensity <- match.arg(startIntensity, c("median","max","model","secondmax"))
+  freeIntersect <- startIntensity == "model"
+  e$NLI.kloss <- NULL
+  x <- unique(e$design$time)
+  if(is.null(ncores)){
+    library(parallel)
+    ncores <- detectCores() - 1
+  }else{
+    if(ncores>1)	library(parallel)
+  }
+  if(ncores>1){
+    library(parallel)
+    cl <- makeCluster(ncores)
+    clusterExport(cl, c("getNLImod",".medianNonNull"))
+    clusterExport(cl, c("x","e","freeIntersect"), environment())
+  }
+  for(p in unique(e$design$sample)){
+    if(ncores > 1){
+      d <- as.data.frame(t(parApply(cl,cbind(apply(e$NCS[,which(e$design$sample==p)],1,na.rm=T,FUN=ifelse(startIntensity=="median",".medianNonNull",startIntensity)),e$NLI[,which(e$design$sample==p)]),1,FUN=function(y){ getNLImod(x,y[-1],ifelse(freeIntersect,NULL,y[1]))} )))
+    }else{
+      d <- as.data.frame(t(apply(cbind(apply(e$NCS[,which(e$design$sample==p)],1,na.rm=T,FUN=ifelse(startIntensity=="median",".medianNonNull",startIntensity)),e$NLI[,which(e$design$sample==p)]),1,freeIntersect=freeIntersect, FUN=function(y, freeIntersect){ getNLImod(x,y[-1],ifelse(freeIntersect,NULL,y[1]))} )))
+    }
+    colnames(d) <- paste(p,c("kloss","kloss.stderr","kloss.SSR","nbpoints"),sep=".")
+    row.names(d) <- row.names(e$NLI)
+    message(paste(" ...calculated ",sum(!is.na(d[,1]))," k_loss values for sample ",p," (",sum(is.na(d[,1]))," missing)",sep=""))
+    if(is.null(e$NLI.kloss)){
+      e$NLI.kloss <- d
+    }else{
+      e$NLI.kloss <- cbind(e$NLI.kloss,d)
+    }
+  }
+  if(ncores > 1) stopCluster(cl)
+  return(e)
+}

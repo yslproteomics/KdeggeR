@@ -1,0 +1,31 @@
+#' Calculate RIA-based k_loss
+#'
+#' Models the rate of loss of the light isotope (k_loss) on the basis of the relative isotope abundance (RIA).
+#'
+#' @param x The timepoints.
+#' @param y The RIA values corresponding to the timepoints.
+#' @param a The starting value of the k_loss for model-fitting.
+#'
+#' @return A numeric vector of length 4 containing: 
+#'	    the k_loss,
+#'	    the standard error of the k_loss, 
+#'	    the sum of residuals of the linear model, 
+#'	    the number of points on which the model was built.
+#'
+#' @export
+getRIAmod <- function(x,y,a=0.1){
+  if(length(x) != length(y))	stop("x and y are of different lengths!")
+  f <- function(x,a){ exp(-a*x) }
+  y <- as.numeric(y)
+  x2 <- x[which(!is.na(y))]
+  y <- y[which(!is.na(y))]
+  if(length(y)==1){
+    if(x2==0)	return(c(NA,NA,NA,1))
+    return( c(-log(y)/x2,NA,NA,1) )
+  }
+  fm <- try(suppressWarnings(nls(y~f(x2,a), start = c(a=a))), silent=T)
+  if(class(fm)=="nls"){
+    return(c(summary(fm)$coefficients[1:2],sum(residuals(fm)^2),length(x2)))
+  }
+  return(c(NA,NA,NA,length(x2)))
+}
