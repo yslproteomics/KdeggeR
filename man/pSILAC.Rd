@@ -11,7 +11,8 @@ pSILAC(
   aggregate.replicates = NA,
   filterPeptides = T,
   ncores = 1,
-  imputeMethod = "normD1"
+  imputeMethod = "normD1",
+  noiseCutoff = 8
 )
 }
 \arguments{
@@ -21,12 +22,17 @@ pSILAC(
 In addition, the 'design' object should have columns named 'sample' (character) and 'time' (numeric).}
 
 \item{requant}{whether to 'keep', 'remove' or 'impute' the requantified values with a score greater than 0.05 (default 'remove', or keep if ). 
-This requires that there be in 'dataset' columns prepended with 'Intensity_' and 'score_' for each sample/timepoint.}
+This requires that there be in 'dataset' columns prepended with 'Intensity_' and 'score_' for each sample/timepoint.
+This option was developed for the output of OpenSwath.}
 
 \item{aggregate.replicates}{Function with which to aggregate replicates ('median' or 'mean'; median recommended), or NA if replicates are absent or should not be aggregated.
 If there are replicates, they should have the same value in the column 'sample' of the design data.frame.}
 
+\item{filterPeptides}{If TRUE, removes peptides without any K or R}
+
 \item{ncores}{the number of cores to use (defaults to 1)}
+
+\item{noiseCutoff}{if not NULL, the cutoff will be applied to light and heavy intensities}
 }
 \value{
 a pSILAC object.

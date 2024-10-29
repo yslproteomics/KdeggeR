@@ -7,147 +7,215 @@
 #' In addition, the 'design' object should have columns named 'sample' (character) and 'time' (numeric).
 #' @param requant whether to 'keep', 'remove' or 'impute' the requantified values with a score greater than 0.05 (default 'remove', or keep if ). 
 #' This requires that there be in 'dataset' columns prepended with 'Intensity_' and 'score_' for each sample/timepoint.
+#' This option was developed for the output of OpenSwath.
 #' @param aggregate.replicates Function with which to aggregate replicates ('median' or 'mean'; median recommended), or NA if replicates are absent or should not be aggregated.
 #' If there are replicates, they should have the same value in the column 'sample' of the design data.frame.
+#' @param filterPeptides If TRUE, removes peptides without any K or R
+#' @param noiseCutoff if not NULL, the cutoff will be applied to light and heavy intensities
 #' @param ncores the number of cores to use (defaults to 1)
-#'
 #' @return a pSILAC object.
 #'
 #' @export
-pSILAC <- function(dataset, design, requant="remove", aggregate.replicates=NA, filterPeptides=T, ncores=1, imputeMethod="normD1"){
-  if(is.character(dataset) & length(dataset)==1)	dataset <- read.delim(dataset,header=T,row.names=1,stringsAsFactors=F,na.strings=c(""," ","NA","N.A.","NaN","n.a."))
-  if(is.character(design) & length(design)==1)	design <- read.delim(design,header=T,row.names=1,stringsAsFactors=F)
-  if(!all(c("time","sample") %in% colnames(design)))	stop("The design data.frame should (at least) have 'sample' and 'time' columns.")
-  if(!any(c("Proteins","Protein") %in% colnames(dataset)))	stop("The dataset should contain a column called 'Protein' or 'Proteins'.")
-  if(!is.numeric(design$time))	stop("The 'time' column of the design data.frame should be numeric.")
-  if(!is.na(aggregate.replicates)) aggregate.replicates <- match.arg(aggregate.replicates, c("median","mean"))
-  if( is.na(aggregate.replicates) & 
-      (length(unique(table(design$sample)))!=1 | length(unique(table(design$time)))!=1 | !all(table(paste(design$sample,design$time))==1)) 
-      ){
-    stop("Unless there are replicates, each sample of the design data.frame should have the same number of timepoints and each sample-time pair should appear only once. 
-    If you are working with replicates, make sure to set 'aggregate.replicates' (see ?pSILAC).")
+pSILAC <- function(dataset, design, requant="remove", aggregate.replicates=NA, filterPeptides=T, ncores=1, imputeMethod="normD1", noiseCutoff = 8){
+  
+  # Load dataset if a file path is provided
+  if(is.character(dataset) & length(dataset)==1)
+    dataset <- read.delim(dataset, header=T, row.names=1, stringsAsFactors=F, na.strings=c(""," ","NA","N.A.","NaN","n.a.", "Filtered", "na", "#N/A", "Fil", "#DIV/0!"))
+  
+  # Load design data if a file path is provided
+  if(is.character(design) & length(design)==1)
+    design <- read.delim(design, header=T, row.names=1, stringsAsFactors=F)
+  
+  # Check if required columns exist in design
+  if(!all(c("time", "sample") %in% colnames(design)))
+    stop("The design data.frame should (at least) have 'sample' and 'time' columns.")
+  
+  # Ensure the dataset contains a protein column
+  if(!any(c("Proteins", "Protein") %in% colnames(dataset)))
+    stop("The dataset should contain a column called 'Protein' or 'Proteins'.")
+  
+  # Ensure the 'time' column is numeric
+  if(!is.numeric(design$time))
+    stop("The 'time' column of the design data.frame should be numeric.")
+  
+  # Aggregate replicates if specified
+  if(!is.na(aggregate.replicates))
+    aggregate.replicates <- match.arg(aggregate.replicates, c("median", "mean"))
+  
+  # Error if replicates exist without proper specification
+  if(is.na(aggregate.replicates) && (length(unique(table(design$sample))) != 1 || length(unique(table(design$time))) != 1 ||
+                                     !all(table(paste(design$sample, design$time)) == 1))) {
+    stop("If working with replicates, set 'aggregate.replicates'. Otherwise, ensure each sample has one entry per time point.")
   }
+  
+  # Sort design data by sample and time
   design <- design[order(design$sample, design$time),]
-  ismq <- c("Proteins" %in% colnames(dataset), length(grep("heavy",row.names(dataset)))==0, length(grep("H.",colnames(dataset),fixed=T))>0 & length(grep("L.",colnames(dataset),fixed=T))>0)
-  if(!all(ismq) & any(ismq))    stop("Could not identify the type of data.")
-  ismq <- all(ismq)
-  if(ismq){
-    snh <- paste("Intensity.H.",row.names(design),sep="")
-    snl <- paste("Intensity.L.",row.names(design),sep="")
-    if(!all( c(snh %in% colnames(dataset), snl %in% colnames(dataset)) )){
-        snh <- paste("H.",row.names(design),sep="")
-        snl <- paste("L.",row.names(design),sep="")        
-        if(!all( c(snh %in% colnames(dataset), snl %in% colnames(dataset)) )) stop("Could not find the light and heavy intensities for all samples of the design data.frame.")
+  
+  if(inputDataType == "spectronaut"){
+    dataset <- dataset %>% 
+      dplyr::rename("Proteins" = PG.ProteinGroups) %>%
+      dplyr::rename("id" = EG.PrecursorId)
+  }
+  
+  # Identify if dataset is in the expected format
+  isStandardFormat <- c("Proteins" %in% colnames(dataset), length(grep("heavy", row.names(dataset)))==0,
+            length(grep("H.", colnames(dataset), fixed=T))>0 & length(grep("L.", colnames(dataset), fixed=T))>0)
+  if(!all(isStandardFormat) & any(isStandardFormat)) stop("Could not identify the type of data.")
+  isStandardFormat <- all(isStandardFormat)
+  
+  # Process standard formatted data
+  if(isStandardFormat) {
+    # Attempt to locate the columns for heavy and light intensities using a standard naming convention
+    snh <- paste("Intensity.H.", row.names(design), sep="")
+    snl <- paste("Intensity.L.", row.names(design), sep="")
+    
+    # If the expected naming is not found in dataset columns, try an alternative naming convention
+    if(!all(c(snh %in% colnames(dataset), snl %in% colnames(dataset)))){
+      
+      # Alternative naming convention for heavy and light intensities
+      snh <- paste("H.", row.names(design), sep="")
+      snl <- paste("L.", row.names(design), sep="")
+      
+      # If neither naming convention is found, stop with an error indicating missing intensities
+      if(!all(c(snh %in% colnames(dataset), snl %in% colnames(dataset))))
+        stop("Could not find the light and heavy intensities for all samples of the design data.frame.")
     }
     e1 <- dataset[,snl]
     e2 <- dataset[,snh]
-    row.names(e2) <- paste(row.names(e2),"heavy",sep="")
+    row.names(e2) <- paste(row.names(e2), "heavy", sep="")
     colnames(e1) <- row.names(design)
     colnames(e2) <- row.names(design)
-    e <- rbind(e1,e2)
-    rm(e1,e2)
-  }else{
+    e <- rbind(e1, e2)
+    rm(e1, e2)
+  } else {
+    # Process Openswath format
     if(!all(row.names(design) %in% colnames(dataset))){
-        if(!all(paste("Intensity",row.names(design),sep="_") %in% colnames(dataset))){
-        stop(	paste("Could not find the intensity for all samples of the design data.frame. Missing samples:",
-                        paste(head(row.names(design)[which(!(paste("Intensity",row.names(design),sep="_") %in% colnames(dataset)))]),"...",collapse=", ")
-                    ))
-        }
-        # rename columns according to usual SWATH output
-        e <- dataset[,paste("Intensity",row.names(design),sep="_")]
-        colnames(e) <- gsub("^Intensity_","",colnames(e))
-        requant <- match.arg(requant, c("remove","keep","impute"))
-        if(requant=="impute")	stop("Imputation not yet implemented")  
-        if(requant != "keep" & !all(paste("score",row.names(design),sep="_") %in% colnames(dataset))){
-        warning("Could not find the scores for all samples. All intensities will be used without filtering.")
-        requant == "keep"
-        }
-        if(requant=="remove"){
-        s <- dataset[,paste("score",row.names(design),sep="_")]
-        colnames(s) <- gsub("^score_","",colnames(s))
+      if(!all(paste("Intensity", row.names(design), sep="_") %in% colnames(dataset))){
+        stop(paste("Could not find the intensity for all samples of the design data.frame. Missing samples:",
+                   paste(head(row.names(design)[which(!(paste("Intensity", row.names(design), sep="_") %in% colnames(dataset)))]), "...", collapse=", ")
+        ))
+      }
+      e <- dataset[,paste("Intensity", row.names(design), sep="_")]
+      colnames(e) <- gsub("^Intensity_", "", colnames(e))
+      requant <- match.arg(requant, c("remove", "keep", "impute"))
+      if(requant == "impute") stop("Imputation not yet implemented")  
+      if(requant != "keep" & !all(paste("score", row.names(design), sep="_") %in% colnames(dataset))){
+        warning("Missing scores for samples; using all intensities without filtering.")
+        requant <- "keep"
+      }
+      if(requant == "remove") {
+        s <- dataset[, paste("score", row.names(design), sep="_")]
+        colnames(s) <- gsub("^score_", "", colnames(s))
         s <- s[colnames(e)]
-        e[s>0.05] <- NA
-        message(paste("Replaced",sum(s>0.05, na.rm=T)," (",round(100*sum(s>0.05, na.rm=T)/(ncol(s)*nrow(s))),"% ) badly requantified datapoints with NAs..."))
+        e[s > 0.05] <- NA
+        message(paste("Replaced", sum(s > 0.05, na.rm=T), "(", round(100 * sum(s > 0.05, na.rm=T) / (ncol(s) * nrow(s))), "% ) badly requantified datapoints with NAs..."))
         rm(s)
-        }
-        e <- e[,row.names(design)]
-    }else{
-        e <- dataset[,row.names(design)]
+      }
+      e <- e[, row.names(design)]
+    } else {
+      e <- dataset[, row.names(design)]
     }
   }
-
-  if(requant=="impute")   e <- imputeAll(e, paste(design$condition,design$time), imputeMethod)
+  
+  # Impute missing values if selected
+  if(requant == "impute") e <- imputeAll(e, paste(design$condition, design$time), imputeMethod)
+  
+  # Filter out peptides without "K" or "R" if specified
   if(filterPeptides){
-    w <- unique(c(grep("K",row.names(e)),grep("R",row.names(e))))
-    if(length(w) < nrow(e)){
-        message(paste(nrow(e)-length(w),"peptides not containing any K or R were discarded."))
-        e <- e[w,]
+    w <- unique(c(grep("K", row.names(e)), grep("R", row.names(e))))
+    if(length(w) < nrow(e)) {
+      message(paste(nrow(e) - length(w), "peptides without K or R were discarded."))
+      e <- e[w,]
     }
   }
+  
+  # Handle replicate aggregation if enabled
   if(!is.na(aggregate.replicates)){
-    nnames <- paste(design$sample,design$time,sep=".")
+    nnames <- paste(design$sample, design$time, sep=".")
     if(length(unique(nnames)) == length(nnames)){
-      message("Replicate aggregation was activated, but no replicate was found. If you have replicates, make sure that the 'sample' column of the design data.frame is the same for each set of replicates.")
-    }else{
-      message(paste("Aggregating replicates using",aggregate.replicates,"..."))
-      design <- aggregate(design,by=list(name=nnames),FUN=function(x){ x[[1]] })
+      message("Replicate aggregation activated, but no replicates found.")
+    } else {
+      message(paste("Aggregating replicates using", aggregate.replicates, "..."))
+      design <- aggregate(design, by=list(name=nnames), FUN=function(x){ x[[1]] })
       o <- order(design$sample, design$time)
       design <- design[o,]
       row.names(design) <- design$name
-      e2 <- matrix(0,nrow=nrow(e),ncol=length(unique(nnames)))
+      e2 <- matrix(0, nrow=nrow(e), ncol=length(unique(nnames)))
       if(is.null(ncores)){
-	library(parallel)
-	ncores <- detectCores() - 1
-      }else{
-	if(ncores>1)	library(parallel)
+        library(parallel)
+        ncores <- detectCores() - 1
+      } else {
+        if(ncores > 1) library(parallel)
       }
-      if(ncores>1){
-	library(parallel)
-	cl <- makeCluster(ncores)
-	clusterExport(cl, c("nnames","e","aggregate.replicates"), environment())
-	e <- parSapply(cl, unique(nnames), FUN=function(x){ apply(e[,which(nnames==x)],1,na.rm=T,FUN=aggregate.replicates) })
-	stopCluster(cl)
-      }else{
-	e <- sapply(unique(nnames), FUN=function(x){ apply(e[,which(nnames==x)],1,na.rm=T,FUN=aggregate.replicates) })
+      if(ncores > 1){
+        library(parallel)
+        cl <- makeCluster(ncores)
+        clusterExport(cl, c("nnames", "e", "aggregate.replicates"), environment())
+        e <- parSapply(cl, unique(nnames), FUN=function(x){ apply(e[, which(nnames == x)], 1, na.rm=T, FUN=aggregate.replicates) })
+        stopCluster(cl)
+      } else {
+        e <- sapply(unique(nnames), FUN=function(x){ apply(e[, which(nnames == x)], 1, na.rm=T, FUN=aggregate.replicates) })
       }
-      e <- e[,o]
+      e <- e[, o]
     }
   }
-  if(!("name" %in% colnames(design)))	design$name <- paste(design$sample, design$time, sep=".")
+  
+  # Finalize design columns
+  if(!("name" %in% colnames(design))) design$name <- paste(design$sample, design$time, sep=".")
   colnames(e) <- design$name
-  if(!("color" %in% colnames(design)))	design$color <- "black"
-  object <- list( design=design,
-		  info=list(creationDate=date(),requant=requant,aggregate.replicates=aggregate.replicates, protk.method="",pSILAC.call=match.call(),protk.call=NULL),
-		  light=e[grep("heavy",row.names(e),invert=T),],
-		  heavy=e[grep("heavy",row.names(e),invert=F),],
-		  peptides=.getPeptideDefinition(dataset, ismq),
-		  RIA=NULL,
-		  hol=NULL,
-		  NLI=NULL,
-		  RIA.kloss=NULL,
-		  hol.kloss=NULL,
-		  protein.kloss=NULL
-		)
-  rm(e)
-  if(ismq){
-    rr <- c(    row.names(object$light)[which(apply(object$light,1,FUN=function(x){ !all(is.na(x)) }))],
-                row.names(object$heavy)[which(apply(object$heavy,1,FUN=function(x){ !all(is.na(x)) }))]
-            )
-    object$light <- object$light[which(row.names(object$light) %in% rr),]
-    object$heavy <- object$heavy[which(row.names(object$heavy) %in% rr),]
-    object$peptides <- object$peptides[rr,]
+  if(!("color" %in% colnames(design))) design$color <- "black"
+  
+  # Create output object with data and settings
+  object <- list(
+    design = design,
+    info = list(creationDate = date(), requant = requant, aggregate.replicates = aggregate.replicates, protk.method = "", pSILAC.call = match.call(), protk.call = NULL),
+    light = e[grep("heavy", row.names(e), invert=T),],
+    heavy = e[grep("heavy", row.names(e), invert=F),],
+    peptides = .getPeptideDefinition(dataset, isStandardFormat),
+    RIA = NULL,
+    hol = NULL,
+    NLI = NULL,
+    RIA.kloss = NULL,
+    hol.kloss = NULL,
+    protein.kloss = NULL
+  )
+  
+  # Additional cleanup for standard data types
+  if(isStandardFormat){
+    
+    # Apply filtering to the data based on noiseCutoff if it's not NULL
+    if(!is.null(noiseCutoff)) {
+      
+      object$light[object$light < noiseCutoff] <- NA
+      object$heavy[object$heavy < noiseCutoff] <- NA
+    }
+    
+    # Identify rows in 'light' and 'heavy' matrices where not all values are NA
+    allNA <- c(row.names(object$light)[apply(object$light, 1, FUN=function(x){ !all(is.na(x)) })],
+            row.names(object$heavy)[apply(object$heavy, 1, FUN=function(x){ !all(is.na(x)) })])
+    
+    # Filter 'light' and 'heavy' matrices to retain only rows with non-NA values found in 'rr'
+    object$light <- object$light[row.names(object$light) %in% allNA, ]
+    object$heavy <- object$heavy[row.names(object$heavy) %in% allNA, ]
+    
+    # Filter peptides to retain only those corresponding to the filtered rows in 'rr'
+    object$peptides <- object$peptides[allNA, ]
   }
-  row.names(object$heavy) <- gsub("heavy","",row.names(object$heavy),fixed=T)
+  
+  # Update row names and calculate RIA and hol metrics
+  row.names(object$heavy) <- gsub("heavy", "", row.names(object$heavy), fixed=T)
   g <- row.names(object$heavy)
-  g <- g[which(g %in% row.names(object$light))]
-  object$RIA <- as.data.frame(object$light[g,]/(object$heavy[g,]+object$light[g,]))
-  object$hol <- as.data.frame(log(object$heavy[g,]/object$light[g,]+1))
+  g <- g[g %in% row.names(object$light)]
+  object$RIA <- as.data.frame(object$light[g, ] / (object$heavy[g, ] + object$light[g, ]))
+  object$hol <- as.data.frame(log(object$heavy[g, ] / object$light[g, ] + 1))
+  
+  # Define class and return object
   class(object) <- "pSILAC"
   return(object)
 }
 
-.getPeptideDefinition <- function(dataset, ismq=FALSE){
-  if(ismq){
+.getPeptideDefinition <- function(dataset, isStandardFormat=FALSE){
+  if(isStandardFormat){
     d <- data.frame(row.names=c(row.names(dataset),paste(row.names(dataset),"heavy",sep="_")), 
                     nbProteins=rep(sapply(as.character(dataset$Proteins),FUN=function(x){ length(strsplit(x,";",fixed=T)[[1]])}),2), 
                     protein=rep(gsub(";","/",as.character(dataset$Proteins),fixed=T),2),
