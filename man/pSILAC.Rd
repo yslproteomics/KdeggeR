@@ -7,6 +7,7 @@
 pSILAC(
   dataset,
   design,
+  inputDataType = "spectronaut",
   requant = "remove",
   aggregate.replicates = NA,
   filterPeptides = T,
@@ -20,6 +21,8 @@ pSILAC(
 
 \item{design}{a data.frame where row.names correspond (optionally with "Intensity_" and "score_" prepended) to columns of 'dataset'. 
 In addition, the 'design' object should have columns named 'sample' (character) and 'time' (numeric).}
+
+\item{inputDataType}{can be "spectronaut", "diann", or "fragpipe"}
 
 \item{requant}{whether to 'keep', 'remove' or 'impute' the requantified values with a score greater than 0.05 (default 'remove', or keep if ). 
 This requires that there be in 'dataset' columns prepended with 'Intensity_' and 'score_' for each sample/timepoint.
