@@ -1,3 +1,59 @@
+#' Generate design table template
+#'
+#' @param path path to the data exported from MS data processing file
+#' @param inputDataType can be "spectronaut", "diann", or "fragpipe"
+#' 
+#' @export
+generate_design_template <- function(path, inputDataType = "spectronaut"){
+  
+  # Load dataset if a file path is provided
+  if(is.character(dataset) & length(dataset)==1 & inputDataType %in% c("spectronaut", "diann", "fragpipe"))
+    dataset <- read.delim(dataset, header=T, row.names=NULL, stringsAsFactors=F, na.strings=c(""," ","NA","N.A.","NaN","n.a.", "Filtered", "na", "#N/A", "Fil", "#DIV/0!"))
+  
+  # Load dataset if a file path is provided
+  if(is.character(dataset) & length(dataset)==1 & inputDataType %in% c("maxquant", "openswath"))
+    dataset <- read.delim(dataset, header=T, row.names=1, stringsAsFactors=F, na.strings=c(""," ","NA","N.A.","NaN","n.a.", "Filtered", "na", "#N/A", "Fil", "#DIV/0!"))
+  
+  if(inputDataType == "spectronaut"){
+    
+    # Define the required columns for Spectronaut data
+    required_columns <- c("PG.ProteinGroups", "EG.PrecursorId")
+    
+    # Check if all required columns are present in the dataset
+    if(!all(required_columns %in% colnames(dataset))) {
+      missing_columns <- required_columns[!required_columns %in% colnames(dataset)]
+      stop(paste("The following required columns are missing from the dataset based on selected input data type:", paste(missing_columns, collapse = ", ")))
+    }
+    
+    raw_file_names <-  dataset %>% 
+      dplyr::select(ends_with("Channel1Quantity")) %>%
+      dplyr::rename_with(cols = ends_with("Channel1Quantity"), ~gsub("(.*)_EG.Channel1Quantity.*", "Intensity.L.\\1", .)) %>%
+      dplyr::rename_with(cols = everything(), ~gsub("Intensity.L.", "", .)) %>%
+      colnames()
+    
+    n_samples <- length(raw_file_names)
+    
+    # make a design table to be exported and modified in excel
+    design <- data.frame(
+      raw_file = raw_file_names, 
+      condition = vector(mode = "character", length = n_samples), 
+      sample = vector(mode = "character", length = n_samples), 
+      time = vector(mode = "numeric", length = n_samples), 
+      replicate = vector(mode = "numeric", length = n_samples), 
+      color = vector(mode = "character", length = n_samples)) 
+    
+    write.table(
+      design, 
+      file = "design_table_template.tsv",       
+      sep = "\t",                      
+      row.names = FALSE,                
+      quote = FALSE                    
+    )
+    
+  }
+  
+}
+
 #' pSILAC object
 #'
 #' Creates a pSILAC object.
@@ -5,6 +61,7 @@
 #' @param dataset a data.frame containing peptides (both heavy and light) as row.names and samples and timepoints as columns (with the addition of a 'Protein' column).
 #' @param design a data.frame where row.names correspond (optionally with "Intensity_" and "score_" prepended) to columns of 'dataset'. 
 #' In addition, the 'design' object should have columns named 'sample' (character) and 'time' (numeric).
+#' @param inputDataType can be "spectronaut", "diann", or "fragpipe"
 #' @param requant whether to 'keep', 'remove' or 'impute' the requantified values with a score greater than 0.05 (default 'remove', or keep if ). 
 #' This requires that there be in 'dataset' columns prepended with 'Intensity_' and 'score_' for each sample/timepoint.
 #' This option was developed for the output of OpenSwath.
@@ -16,10 +73,14 @@
 #' @return a pSILAC object.
 #'
 #' @export
-pSILAC <- function(dataset, design, requant="remove", aggregate.replicates=NA, filterPeptides=T, ncores=1, imputeMethod="normD1", noiseCutoff = 8){
+pSILAC <- function(dataset, design, inputDataType = "spectronaut", requant="remove", aggregate.replicates=NA, filterPeptides=T, ncores=1, imputeMethod="normD1", noiseCutoff = 8){
   
   # Load dataset if a file path is provided
-  if(is.character(dataset) & length(dataset)==1)
+  if(is.character(dataset) & length(dataset)==1 & inputDataType %in% c("spectronaut", "diann", "fragpipe"))
+    dataset <- read.delim(dataset, header=T, row.names=NULL, stringsAsFactors=F, na.strings=c(""," ","NA","N.A.","NaN","n.a.", "Filtered", "na", "#N/A", "Fil", "#DIV/0!"))
+  
+  # Load dataset if a file path is provided
+  if(is.character(dataset) & length(dataset)==1 & inputDataType %in% c("maxquant", "openswath"))
     dataset <- read.delim(dataset, header=T, row.names=1, stringsAsFactors=F, na.strings=c(""," ","NA","N.A.","NaN","n.a.", "Filtered", "na", "#N/A", "Fil", "#DIV/0!"))
   
   # Load design data if a file path is provided
@@ -52,19 +113,62 @@ pSILAC <- function(dataset, design, requant="remove", aggregate.replicates=NA, f
   design <- design[order(design$sample, design$time),]
   
   if(inputDataType == "spectronaut"){
+    
+    # Define the required columns for Spectronaut data
+    required_columns <- c("PG.ProteinGroups", "EG.PrecursorId")
+    
+    # Check if all required columns are present in the dataset
+    if(!all(required_columns %in% colnames(dataset))) {
+      missing_columns <- required_columns[!required_columns %in% colnames(dataset)]
+      stop(paste("The following required columns are missing from the dataset based on selected input data type:", paste(missing_columns, collapse = ", ")))
+    }
+    
     dataset <- dataset %>% 
       dplyr::rename("Proteins" = PG.ProteinGroups) %>%
-      dplyr::rename("id" = EG.PrecursorId)
+      dplyr::rename("id" = EG.PrecursorId) %>%
+      dplyr::rename_with(cols = ends_with("Channel1Quantity"), ~gsub("(.*)_EG.Channel1Quantity.*", "Intensity.L.\\1", .)) %>%
+      dplyr::rename_with(cols = ends_with("Channel1Quantity"), ~gsub("(.*)_EG.Channel2Quantity.*", "Intensity.H.\\1", .)) %>%
+      dplyr::select(id, Proteins, dplyr::starts_with("Intensity."))
+    
+    row.names(dataset) <- dataset$id
+
+  }
+  
+  if(inputDataType == "diann" | inputDataType == "fragpipe"){
+    
+    # Define the required columns for Spectronaut data
+    required_columns <- c("Protein.Group", "Precursor.Id")
+    
+    # Check if all required columns are present in the dataset
+    if(!all(required_columns %in% colnames(dataset))) {
+      missing_columns <- required_columns[!required_columns %in% colnames(dataset)]
+      stop(paste("The following required columns are missing from the dataset based on selected input data type:", paste(missing_columns, collapse = ", ")))
+    }
+    
+    dataset <- dataset %>% 
+      dplyr::rename("Proteins" = Protein.Group) %>%
+      dplyr::rename("id" = Precursor.Id) %>%
+      dplyr::rename_with(cols = ends_with(".L"), ~gsub("(.*).L", "Intensity.L.\\1", .)) %>%
+      dplyr::rename_with(cols = ends_with(".L"), ~gsub("(.*).H", "Intensity.H.\\1", .)) %>%
+      dplyr::select(id, Proteins, dplyr::starts_with("Intensity."))
+    
+    row.names(dataset) <- dataset$id
+  }
+  
+  if(inputDataType == "maxquant"){
+    dataset <- dataset
   }
   
   # Identify if dataset is in the expected format
   isStandardFormat <- c("Proteins" %in% colnames(dataset), length(grep("heavy", row.names(dataset)))==0,
             length(grep("H.", colnames(dataset), fixed=T))>0 & length(grep("L.", colnames(dataset), fixed=T))>0)
+  
   if(!all(isStandardFormat) & any(isStandardFormat)) stop("Could not identify the type of data.")
   isStandardFormat <- all(isStandardFormat)
   
   # Process standard formatted data
   if(isStandardFormat) {
+    
     # Attempt to locate the columns for heavy and light intensities using a standard naming convention
     snh <- paste("Intensity.H.", row.names(design), sep="")
     snl <- paste("Intensity.L.", row.names(design), sep="")
@@ -80,13 +184,25 @@ pSILAC <- function(dataset, design, requant="remove", aggregate.replicates=NA, f
       if(!all(c(snh %in% colnames(dataset), snl %in% colnames(dataset))))
         stop("Could not find the light and heavy intensities for all samples of the design data.frame.")
     }
-    e1 <- dataset[,snl]
-    e2 <- dataset[,snh]
-    row.names(e2) <- paste(row.names(e2), "heavy", sep="")
-    colnames(e1) <- row.names(design)
-    colnames(e2) <- row.names(design)
-    e <- rbind(e1, e2)
-    rm(e1, e2)
+    
+    # subset data to select columns with light intensities
+    channel_1 <- dataset[,snl]
+    
+    # subset data to select columns with heavy intensities
+    channel_2 <- dataset[,snh]
+    
+    # add "heavy" to the row names of the channel 2 data
+    row.names(channel_2) <- paste(row.names(channel_2), "heavy", sep="")
+    
+    # rename the light and heavy data using the raw file names
+    colnames(channel_1) <- row.names(design)
+    colnames(channel_2) <- row.names(design)
+    
+    # combine light and heavy intensities
+    e <- rbind(channel_1, channel_2)
+    
+    rm(channel_1, channel_2)
+    
   } else {
     # Process Openswath format
     if(!all(row.names(design) %in% colnames(dataset))){
@@ -162,7 +278,11 @@ pSILAC <- function(dataset, design, requant="remove", aggregate.replicates=NA, f
   
   # Finalize design columns
   if(!("name" %in% colnames(design))) design$name <- paste(design$sample, design$time, sep=".")
+  
+  # rename the columns using the sample name in the deign table
   colnames(e) <- design$name
+  
+  # set a default color if none is specified
   if(!("color" %in% colnames(design))) design$color <- "black"
   
   # Create output object with data and settings
