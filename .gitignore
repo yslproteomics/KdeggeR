@@ -5,3 +5,4 @@
 *.Rproj
 /.Rproj.user
 .Rbuildignore
+/data/example_data_pSILAC_SN19_A2780Cis_Nor_full.tsv
