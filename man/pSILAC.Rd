@@ -23,7 +23,7 @@ the dataset must be a data.frame with precursor ids used as row names.}
 
 \item{design}{A tab-separated file, where the first column corresponds to the raw file name,
 it must have a "sample" column and a "time" column in numeric format (hours). 
-Optionally, conditions and replicates (numeric) can be specified for a replicate design analysis. 
+Optionally, replicates (numeric) can be specified for a replicate design analysis. If there are replicates to be averaged, they should have the same value in the column 'sample' of the design table.
 Color column can be specified to customize data plotting.
 Use the "generate_design_template()" function to generate a customizable design table template. 
 If the design table is loaded in R environment, the design must be a data.frame with raw file names used as row names.}
