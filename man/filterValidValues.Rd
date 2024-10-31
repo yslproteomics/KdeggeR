@@ -17,5 +17,5 @@ filterValidValues(o, values_cutoff = 2, skip_time_point = 1)
 The updated pSILAC object with filtered data.
 }
 \description{
-A wrapper to apply the filter_valid_skip_early_tp function to all pSILAC labeling series in the dataset.
+A wrapper to apply the filterValidValues_skipTimePoints function to all pSILAC labeling series in the dataset.
 }

@@ -1,6 +1,6 @@
 #' @title Filter data based on valid values
 #'
-#' @description A wrapper to apply the filter_valid_skip_early_tp function to all pSILAC labeling series in the dataset.
+#' @description A wrapper to apply the filterValidValues_skipTimePoints function to all pSILAC labeling series in the dataset.
 #'
 #' @param o a pSILAC object.
 #' @param values_cutoff Specifies the minimum number of valid values to keep per pSILAC labeling series (default is 2).
@@ -14,7 +14,7 @@ filterValidValues <- function(o, values_cutoff = 2, skip_time_point = 1) {
   if (class(o) != "pSILAC") stop("Input data should be a pSILAC object.")
   
   # Define individual samples based on the design table
-  samples <- unique(o$design$sample)
+  samples <- o$design$sample
   
   #############################################################################
   # Use the RIA data frame from the pSILAC object
