@@ -291,10 +291,18 @@ pSILAC <- function(dataset, design, inputDataType = "spectronaut", requant="remo
   row.names(object$heavy) <- gsub("heavy", "", row.names(object$heavy), fixed=T)
   g <- row.names(object$heavy)
   g <- g[g %in% row.names(object$light)]
+  
+  # generate the RIA matrix for nls fitting
   object$RIA <- as.data.frame(object$light[g, ] / (object$heavy[g, ] + object$light[g, ]))
+  
+  # generate the log-transformed H/L ratio for linear fitting 
   object$hol <- as.data.frame(log(object$heavy[g, ] / object$light[g, ] + 1))
   
   # Define class and return object
   class(object) <- "pSILAC"
+  
+  # normalize light channels to generate the NLI matrix for nls fitting
+  object <- normalizeLightChannel(object)
+  
   return(object)
 }
