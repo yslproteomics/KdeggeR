@@ -24,5 +24,5 @@ filterMonotone_skipTimePoints(
 A filtered data frame.
 }
 \description{
-The input is a data frame  frame split into a list based on grouping defined in the design object. Do everything with HOL, and then filter ther RIA data frane based on it?
+The input is a data frame  frame split into a list based on grouping defined in the design object.
 }
