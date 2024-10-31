@@ -1,19 +1,29 @@
-#' Generate pSILAC class object
+#' @title Generate pSILAC class object
 #'
-#' Creates a pSILAC object.
+#' @description Creates a pSILAC object. Needs a design table and precursor-level report from an DIA-MS data processing software such as
+#' Spectronaut, DIA-NN, and Fragpipe. 
+#' These can be provided as path or as data loaded in R environment. 
 #'
-#' @param dataset a data.frame containing peptides (both heavy and light) as row.names and samples and timepoints as columns (with the addition of a 'Protein' column).
-#' @param design a data.frame where row.names correspond (optionally with "Intensity_" and "score_" prepended) to columns of 'dataset'. 
-#' In addition, the 'design' object should have columns named 'sample' (character) and 'time' (numeric).
-#' @param inputDataType can be "spectronaut", "diann", "fragpipe", "maxquant", or "openswath
-#' @param requant whether to 'keep', 'remove' or 'impute' the requantified values with a score greater than 0.05 (default 'remove', or keep if ). 
-#' This requires that there be in 'dataset' columns prepended with 'Intensity_' and 'score_' for each sample/timepoint.
-#' This option was developed for the output of OpenSwath.
-#' @param aggregate.replicates Function with which to aggregate replicates ('median' or 'mean'; median recommended), or NA if replicates are absent or should not be aggregated.
-#' If there are replicates, they should have the same value in the column 'sample' of the design data.frame.
-#' @param filterPeptides If TRUE, removes peptides without any K or R
-#' @param noiseCutoff if not NULL, the cutoff will be applied to light and heavy intensities
+#' @param dataset A tab-separated file containing precursor-level data. Must contain quantification columns with light and heavy 
+#' precursor intensities, unique precursor id, and a protein id column. If the data are loaded in R environment,
+#' the dataset must be a data.frame with precursor ids used as row names.
+#' @param design A tab-separated file, where the first column corresponds to the raw file name,
+#' it must have a "sample" column and a "time" column in numeric format (hours). 
+#' Optionally, replicates (numeric) can be specified for a replicate design analysis. If there are replicates to be averaged, they should have the same value in the column 'sample' of the design table.
+#' Color column can be specified to customize data plotting.
+#' Use the "generate_design_template()" function to generate a customizable design table template. 
+#' If the design table is loaded in R environment, the design must be a data.frame with raw file names used as row names.
+#' @param inputDataType can be "spectronaut", "diann", "fragpipe", "maxquant", or "openswath. 
+#' @param aggregate.replicates function with which to aggregate replicates ('median' or 'mean'; median recommended), 
+#' or NA if replicates are absent or should not be aggregated.
+#' If there are replicates, they should have the same value in the column 'sample' of the design table.
+#' @param filterPeptides If TRUE, removes peptides without any K or R from the analysis (recommended)
+#' @param noiseCutoff if not NULL, the cutoff will be applied to light and heavy intensities. 
 #' @param ncores the number of cores to use (defaults to 1)
+#' @param requant this parameter is only relevant for OpenSwath results. 
+#' Indicates whether to 'keep', 'remove' or 'impute' the requantified values with a score greater than 0.05 (default 'remove', or keep if ). 
+#' This requires that there are columns prepended with 'Intensity_' and 'score_' for each sample/timepoint in the 'dataset'.
+#' 
 #' @return a pSILAC object.
 #'
 #' @export
