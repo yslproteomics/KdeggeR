@@ -1,6 +1,7 @@
-#' normalizeLightChannel
+#' @title normalizeLightChannel
 #' 
-#' Normalizes the light channel so that the channel sum is constant. Will be used for the NLI method. 
+#' @description Normalizes the light channel so that the channel sum is constant. 
+#' The normalized light channel can be used for the NLI method. 
 #'
 #' @param o a pSILAC object.
 #' @param method normalization method, either 'linear' (default) or 'geometric'.
@@ -11,27 +12,57 @@
 #'
 #' @export
 normalizeLightChannel <- function(o, method="linear", timepoints=NULL, removeNAs=T){
-  if(class(o) != "pSILAC")	stop("o should be a pSILAC object.")
+  
+  # Ensure the object 'o' is of class 'pSILAC'
+  if(class(o) != "pSILAC") stop("o should be a pSILAC object.")
+  
+  # Match the method argument to 'geometric' or 'linear'; use 'linear' by default if unspecified
   method <- match.arg(method, c("geometric","linear"))
+  
+  # Assign timepoints based on provided vector or default to unique time values from o$design
   if(is.null(timepoints)) timepoints <- unique(o$design$time)
-  csu <- .getChannelSum(o,T)
+  
+  # Calculate the channel sum for the light channel (with optional NA removal)
+  csu <- .getChannelSum(o, T)
+  
+  # Get row names (protein identifiers) of the channel sum
   p <- row.names(csu)
-  if(removeNAs) csu <- csu[which( apply(o$heavy[p,which(o$design$time %in% timepoints)],1,FUN=function(x){!any(is.na(x))}) & 
-                                    apply(o$light[p,which(o$design$time %in% timepoints)],1,FUN=function(x){!any(is.na(x))})
-  ),]
-  sizeFactors <- apply(log(csu),2,na.rm=T,FUN=median)
-  if(method=="geometric"){
-    normFactors <- 1/(sizeFactors/mean(sizeFactors))
-    normFactors <- normFactors/exp(mean(log(normFactors)))
-    o$NCS <- as.data.frame(exp(t(t(log(.getChannelSum(o,F)))*normFactors)))
-    o$NLI <- as.data.frame(exp(t(t(log(o$light))*normFactors)))
-  }else{
-    normFactors <- exp(max(sizeFactors)-sizeFactors)
-    o$NCS <- as.data.frame(t(t(.getChannelSum(o,F))*normFactors))
-    o$NLI <- as.data.frame(t(t(o$light)*normFactors))
+  
+  # Filter out rows with NA values in either the heavy or light channels for the specified timepoints
+  if(removeNAs) csu <- csu[which(apply(o$heavy[p, which(o$design$time %in% timepoints)], 1, 
+                                       FUN = function(x) {!any(is.na(x))}) & 
+                                   apply(o$light[p, which(o$design$time %in% timepoints)], 1, 
+                                         FUN = function(x) {!any(is.na(x))})
+  ), ]
+  
+  # Calculate size factors as the median of log-transformed channel sums, removing NAs as needed
+  sizeFactors <- apply(log(csu), 2, na.rm = T, FUN = median)
+  
+  # Normalize based on the specified method
+  if(method == "geometric"){
+    message("Normalizing the light channel using geometric method.")
+    # Calculate normalization factors using geometric scaling
+    normFactors <- 1 / (sizeFactors / mean(sizeFactors))
+    normFactors <- normFactors / exp(mean(log(normFactors)))  # Scale to stabilize mean
+    
+    # Update the normalized channel sum (NCS) and normalized light intensity (NLI) in the pSILAC object
+    o$NCS <- as.data.frame(exp(t(t(log(.getChannelSum(o, F))) * normFactors)))
+    o$NLI <- as.data.frame(exp(t(t(log(o$light)) * normFactors)))
+    
+  } else {
+    message("Normalizing the light channel using linear method.")
+    # Calculate normalization factors using linear scaling
+    normFactors <- exp(max(sizeFactors) - sizeFactors)
+    
+    # Update the normalized channel sum (NCS) and normalized light intensity (NLI) in the pSILAC object
+    o$NCS <- as.data.frame(t(t(.getChannelSum(o, F)) * normFactors))
+    o$NLI <- as.data.frame(t(t(o$light) * normFactors))
   }
+  
+  # Return the modified pSILAC object with normalized fields
   return(o)
 }
+
 
 .getChannelSum <- function(o, inBothChannels=T){
   p <- row.names(o$light)
