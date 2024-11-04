@@ -4,7 +4,7 @@
 #' @param inputDataType can be "spectronaut", "diann", or "fragpipe"
 #' 
 #' @export
-generate_design_template <- function(dataset, inputDataType = "spectronaut"){
+generateDesignTemplate <- function(dataset, inputDataType = "spectronaut"){
   
   # Load dataset if a file path is provided
   if(is.character(dataset) & length(dataset)==1 & inputDataType %in% c("spectronaut", "diann", "fragpipe"))

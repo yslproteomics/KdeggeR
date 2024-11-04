@@ -31,7 +31,7 @@
 #' @return a pSILAC object.
 #'
 #' @export
-pSILAC <- function(dataset, design, inputDataType = "spectronaut", requant="remove", aggregate.replicates=NA, filterPeptides=T, ncores=1, imputeMethod="normD1", noiseCutoff = 8){
+generatepSILACObject <- function(dataset, design, inputDataType = "spectronaut", requant="remove", aggregate.replicates=NA, filterPeptides=T, ncores=1, imputeMethod="normD1", noiseCutoff = 8){
   
   if (is.character(dataset) && length(dataset) == 1) {
     
