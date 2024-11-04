@@ -1,34 +1,3 @@
-#' Calculate the Median of Non-Null, Non-Zero Values
-#'
-#' This function computes the median of a numeric vector, ignoring values 
-#' that are less than or equal to zero. It returns \code{NA} if no values
-#' greater than zero are present in the vector.
-#'
-#' @param x A numeric vector from which the median of non-zero values is to be calculated.
-#' @param na.rm A logical value indicating whether \code{NA} values should be stripped before 
-#'        the computation proceeds. Default is \code{TRUE}.
-#' 
-#' @return The median of the non-zero values in \code{x}. If no values greater than zero are
-#'         found, the function returns \code{NA}.
-#'
-#' @details This function first removes all values from the input vector \code{x} that are 
-#'          less than or equal to zero. It then calculates the median of the remaining 
-#'          values. If the resulting vector is empty, \code{NA} is returned.
-#'
-#' @export
-.medianNonNull <- function(x, na.rm = TRUE) {
-  # Filter out values that are less than or equal to zero
-  x <- x[which(x > 0)]
-  
-  # If there are remaining values, return the median
-  if (length(x) > 0) {
-    return(median(x, na.rm = na.rm))
-  }
-  
-  # If no non-zero values are present, return NA
-  return(NA)
-}
-
 #' Calculate all peptide and protein kloss.
 #'
 #' A wrapper that calls, in order, calcRIAkloss(), getHoLkloss() and calcProteinsKloss().

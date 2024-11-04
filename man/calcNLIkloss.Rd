@@ -11,27 +11,25 @@ calcNLIkloss(o, startIntensity = "max", ncores = NULL)
 
 \item{startIntensity}{Character. Specifies the method for determining the starting intensity for model fitting:
 \itemize{
-  \item \code{"model"} - Fits the model with an intersect.
-  \item \code{"max"} - Uses the maximum H+L intensity as the intersect (default).
-  \item \code{"median"} - Uses the median of non-null H+L intensities as the intersect.
+  \item \code{"model"} - Fit the model with an intercept, allowing the initial intensity to be estimated during the fitting. This option is not functional in the current version. 
+  \item \code{"max"} - Use the maximum of observed H+L intensities as the starting intensity (default).
+  \item \code{"median"} - Use the median of non-null H+L intensities as the starting intensity. Consider this option if the data are not filtered using `filterMonotone`
 }}
 
-\item{ncores}{Integer. The number of cores to use for parallel computation. If \code{NULL} (default), the function 
-detects available cores and uses all but one.}
+\item{ncores}{Integer. The number of cores to use for parallel computation. If \code{NULL} (default), the function detects the 
+available cores and uses all but one. Single-core processing is used if \code{ncores = 1}.}
 }
 \value{
-The input `pSILAC` object with an added `NLI.kloss` element, containing the calculated \( k_{loss} \), 
-standard error, sum of squared residuals, and the number of points used in the fitting for each sample.
+The updated `pSILAC` object with an additional `NLI.kloss` component. This component contains calculated values for each peptide, including:
+\itemize{
+  \item \code{kloss} - The decay rate constant.
+  \item \code{kloss.stderr} - Standard error of the decay rate.
+  \item \code{kloss.SSR} - Sum of squared residuals from the model fit.
+  \item \code{nbpoints} - Number of points used in the fitting.
+}
 }
 \description{
-This function applies the `getNLImod` function to all peptides in a pSILAC dataset to calculate the decay rate 
-constant \( k_{loss} \) for normalized light intensities. It uses a specified starting intensity as the intersect for fitting 
-the model, and supports parallel computation to speed up processing.
-}
-\details{
-This function performs the following steps:
-\itemize{
-  \item Uses parallel processing, if multiple cores are available, to apply `getNLImod` on each peptide across different samples.
-  \item Calculates \( k_{loss} \), the standard error, and other fit metrics for each peptide, based on the specified starting intensity method.
-}
+This function applies `getNLImod` to each peptide in the dataset, calculating the decay rate constant \( k_{loss} \) 
+based on normalized light intensities (NLI). Users can specify how to set the starting intensity for the model, 
+with options to use a model-fitted intercept, maximum observed intensity, or median of non-missing intensities.
 }
