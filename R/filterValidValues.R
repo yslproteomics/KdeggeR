@@ -1,17 +1,25 @@
-#' @title Filter data based on valid values
+#' @title Filter Data Based on Valid Values
 #'
-#' @description A wrapper to apply the filterValidValues_skipTimePoints function to all pSILAC labeling series in the dataset.
+#' @description Applies the `filterValidValues_skipTimePoints` function to filter each pSILAC labeling series in the dataset. 
+#' This function processes multiple data frames within the pSILAC object (RIA, HOL, NLI) and filters data based on a specified 
+#' minimum number of valid values, while optionally skipping a defined number of initial time points.
 #'
-#' @param o a pSILAC object.
-#' @param values_cutoff Specifies the minimum number of valid values to keep per pSILAC labeling series (default is 2).
-#' @param skip_time_point Specifies how many early time points should be excluded from valid value filtering (default is 1). 
+#' @param o A pSILAC object.
+#' @param values_cutoff Integer. The minimum number of valid values required to retain data within each pSILAC labeling series.
+#' Default is 2.
+#' @param skip_time_point Integer. The number of early time points to exclude from filtering based on valid values. Default is 1.
 #' @importFrom dplyr select full_join
 #' @importFrom purrr reduce
-#' @return The updated pSILAC object with filtered data.
+#'
+#' @details This function performs filtering on three specific data frames (`RIA`, `HOL`, and `NLI`) within a pSILAC object. 
+#'
+#' @return The pSILAC object `o`, with the `RIA`, `HOL`, and `NLI` data frames updated to reflect the applied filtering.
 #' @export
 filterValidValues <- function(o, values_cutoff = 2, skip_time_point = 1) {
   
   if (class(o) != "pSILAC") stop("Input data should be a pSILAC object.")
+  if (!is.numeric(values_cutoff) || values_cutoff < 0) stop("values_cutoff should be a non-negative integer.")
+  if (!is.numeric(skip_time_point) || skip_time_point < 0) stop("skip_time_point should be a non-negative integer.")
   
   # Define individual samples based on the design table
   samples <- o$design$sample
@@ -26,10 +34,9 @@ filterValidValues <- function(o, values_cutoff = 2, skip_time_point = 1) {
   # Split data into individual pSILAC labeling series
   split_ria <- lapply(split.default(ria_data, samples), as.data.frame)
   
-  # Filter data based on valid values
-  message("Filtering the RIA data based on valid values.")
+  message(paste(Sys.time(), "Filtering the RIA data based on valid values...", sep = " "))
   
-  split_ria <- lapply(split_ria, filterValidValues_skipTimePoints, values_cutoff = values_cutoff, skip_time_point = skip_time_point)
+  split_ria <- lapply(split_ria, filterValidValuesSkipTimePoints, values_cutoff = values_cutoff, skip_time_point = skip_time_point)
   
   split_ria <- lapply(split_ria, function(x) { x$id <- row.names(x); return(x) })
   
@@ -40,8 +47,6 @@ filterValidValues <- function(o, values_cutoff = 2, skip_time_point = 1) {
   o$RIA <- filter_ria %>%
     dplyr::select(-id) %>%
     dplyr::select(all_of(original_order))
-
-  message("RIA filtering completed.")
   
   #############################################################################
   # Use the HOL data frame from the pSILAC object
@@ -54,9 +59,9 @@ filterValidValues <- function(o, values_cutoff = 2, skip_time_point = 1) {
   split_hol <- lapply(split.default(hol_data, samples), as.data.frame)
   
   # Filter data based on valid values
-  message("Filtering the Ln H/L data based on valid values.")
+  message(paste(Sys.time(), "Filtering the ln(H/L+1) data based on valid values...", sep = " "))
   
-  split_hol <- lapply(split_hol, filterValidValues_skipTimePoints, values_cutoff = values_cutoff, skip_time_point = skip_time_point)
+  split_hol <- lapply(split_hol, filterValidValuesSkipTimePoints, values_cutoff = values_cutoff, skip_time_point = skip_time_point)
   
   split_hol <- lapply(split_hol, function(x) { x$id <- row.names(x); return(x) })
   
@@ -67,8 +72,6 @@ filterValidValues <- function(o, values_cutoff = 2, skip_time_point = 1) {
   o$hol <- filter_hol %>%
     dplyr::select(-id) %>%
     dplyr::select(all_of(original_order))
-  
-  message("Ln H/L data filtering completed.")
   
   #############################################################################
   # Use the NLI data frame from the pSILAC object
@@ -81,9 +84,9 @@ filterValidValues <- function(o, values_cutoff = 2, skip_time_point = 1) {
   split_NLI <- lapply(split.default(NLI_data, samples), as.data.frame)
   
   # Filter data based on valid values
-  message("Filtering the NLI data based on valid values.")
+  message(paste(Sys.time(), "Filtering the NLI data based on valid values...", sep = " "))
   
-  split_NLI <- lapply(split_NLI, filterValidValues_skipTimePoints, values_cutoff = values_cutoff, skip_time_point = skip_time_point)
+  split_NLI <- lapply(split_NLI, filterValidValuesSkipTimePoints, values_cutoff = values_cutoff, skip_time_point = skip_time_point)
   
   split_NLI <- lapply(split_NLI, function(x) { x$id <- row.names(x); return(x) })
   
@@ -95,35 +98,7 @@ filterValidValues <- function(o, values_cutoff = 2, skip_time_point = 1) {
     dplyr::select(-id) %>%
     dplyr::select(all_of(original_order))
   
-  message("NLI data filtering completed.")
+  message(paste(Sys.time(), "Valid value filtering completed.", sep = " "))
   
   return(o)
-}
-
-#' Filter data based on valid values, skipping early time points
-#'
-#' The input is a data frame  frame split into a list based on grouping defined in the design object.
-#'
-#' @param data A data frame containing values from one pSILAC labeling series.
-#' @param values_cutoff Specifies the minimum number of valid values to keep per pSILAC labeling series. Default is 2.
-#' @param skip_time_point Specifies how many early time points should be excluded from valid value filtering. Default is 1.
-#' @importFrom dplyr filter select
-#' @return a filtered data frame.
-#' @export
-filterValidValues_skipTimePoints <- function(data, values_cutoff = 2, skip_time_point = 1) {
-  
-  # Start with the specified time point
-  t <- skip_time_point + 1
-  n <- ncol(data)
-  
-  # Calculate the number of valid values for each row, ignoring NA values
-  data$valid_values <- apply(data[, t:n], 1, function(x) { sum(!is.na(x)) })
-  
-  # Filter based on the required minimum number of valid values 
-  data_filtered <- data %>%
-    dplyr::filter(valid_values >= values_cutoff) %>%
-    dplyr::select(-valid_values)
-  
-  # Return the filtered data
-  return(data_filtered)
 }

@@ -3,12 +3,11 @@
 #' @description A wrapper to apply the filter_monotone_trend_tp1excluded function to all pSILAC labeling series in the dataset.
 #'
 #' @param o a pSILAC object
-#' @param values_cutoff Specifies the minimum number of valid values to keep per pSILAC labeling series. Default is 2.
 #' @param skip_time_point Specifies how many early time points should be excluded from valid value filtering. Default is 1.
 #' @importFrom dplyr filter select
 #' @return A filtered data frame.
 #' @export
-filterMonotone <- function(o, values_cutoff = 2, skip_time_point = 1){
+filterMonotone <- function(o, skip_time_point = 1){
   
   if (class(o) != "pSILAC") stop("Input data should be a pSILAC object.")
   
@@ -26,9 +25,9 @@ filterMonotone <- function(o, values_cutoff = 2, skip_time_point = 1){
   split_ria <- lapply(split.default(ria_data, samples), as.data.frame)
   
   # Filter data based on valid values
-  message("Filtering the RIA data based on monotone decrease.")
+  message(paste(Sys.time(), "Filtering the RIA data based on monotone decrease...", sep = " "))
   
-  split_ria <- lapply(split_ria, filterMonotone_skipTimePoints, values_cutoff = values_cutoff, skip_time_point = skip_time_point, mode = "RIA")
+  split_ria <- lapply(split_ria, filterMonotoneSkipTimePoints, skip_time_point = skip_time_point, mode = "RIA")
   
   split_ria <- lapply(split_ria, function(x) { x$id <- row.names(x); return(x) })
   
@@ -39,8 +38,6 @@ filterMonotone <- function(o, values_cutoff = 2, skip_time_point = 1){
   o$RIA <- filter_ria %>%
     dplyr::select(-id) %>%
     dplyr::select(all_of(original_order))
-  
-  message("RIA filtering completed.")
   
   #############################################################################
   # Use the HOL data frame from the pSILAC object
@@ -53,9 +50,9 @@ filterMonotone <- function(o, values_cutoff = 2, skip_time_point = 1){
   split_hol <- lapply(split.default(hol_data, samples), as.data.frame)
   
   # Filter data based on valid values
-  message("Filtering the Ln H/L data based on monotone increase.")
+  message(paste(Sys.time(), "Filtering the ln(H/L+1) data based on monotone increase...", sep = " "))
   
-  split_hol <- lapply(split_hol, filterMonotone_skipTimePoints, values_cutoff = values_cutoff, skip_time_point = skip_time_point, mode = "HOL")
+  split_hol <- lapply(split_hol, filterMonotoneSkipTimePoints, skip_time_point = skip_time_point, mode = "HOL")
   
   split_hol <- lapply(split_hol, function(x) { x$id <- row.names(x); return(x) })
   
@@ -66,8 +63,6 @@ filterMonotone <- function(o, values_cutoff = 2, skip_time_point = 1){
   o$hol <- filter_hol %>%
     dplyr::select(-id) %>%
     dplyr::select(all_of(original_order))
-  
-  message("Ln H/L data filtering completed.")
   
   #############################################################################
   # Use the NLI data frame from the pSILAC object
@@ -80,9 +75,9 @@ filterMonotone <- function(o, values_cutoff = 2, skip_time_point = 1){
   split_NLI <- lapply(split.default(NLI_data, samples), as.data.frame)
   
   # Filter data based on valid values
-  message("Filtering the NLI data based on monotone decrease.")
+  message(paste(Sys.time(), "Filtering the NLI data based on monotone decrease...", sep = " "))
   
-  split_NLI <- lapply(split_NLI, filterMonotone_skipTimePoints, values_cutoff = values_cutoff, skip_time_point = skip_time_point, mode = "NLI")
+  split_NLI <- lapply(split_NLI, filterMonotoneSkipTimePoints, skip_time_point = skip_time_point, mode = "NLI")
   
   split_NLI <- lapply(split_NLI, function(x) { x$id <- row.names(x); return(x) })
   
@@ -94,7 +89,7 @@ filterMonotone <- function(o, values_cutoff = 2, skip_time_point = 1){
     dplyr::select(-id) %>%
     dplyr::select(all_of(original_order))
   
-  message("NLI data filtering completed.")
+  message(paste(Sys.time(), "Monotone trend filtering completed.", sep = " "))
   
   return(o)
 }
@@ -104,13 +99,12 @@ filterMonotone <- function(o, values_cutoff = 2, skip_time_point = 1){
 #' @description The input is a data frame  frame split into a list based on grouping defined in the design object. 
 #'
 #' @param data A data frame containing values from one pSILAC labeling series.
-#' @param values_cutoff Specifies the minimum number of valid values to keep per pSILAC labeling series. Default is 2.
 #' @param skip_time_point Specifies how many early time points should be excluded from valid value filtering. Default is 1.
 #' @param mode Specifies whether the filtering is performed with the "RIA", "HOL", or "NLI" values. 
 #' @importFrom dplyr filter select
 #' @return A filtered data frame.
 #' @export
-filterMonotone_skipTimePoints <- function(data, values_cutoff = 2, skip_time_point = 1, mode = NULL){
+filterMonotoneSkipTimePoints <- function(data, skip_time_point = 1, mode = NULL){
   
   # to start with time point number 2
   t <- skip_time_point + 1
@@ -125,8 +119,8 @@ filterMonotone_skipTimePoints <- function(data, values_cutoff = 2, skip_time_poi
   data <- data %>%
     dplyr::filter(valid_values > 0)
   
-  # generate two vectors with 
-  values <- unique(data$valid_values)
+  # generate two values vectors
+  values <- sort(unique(data$valid_values))
   trend <- values - 1
   
   # split the data based on the valid values for a custom filtering

@@ -24,6 +24,10 @@
 #' Indicates whether to 'keep', 'remove' or 'impute' the requantified values with a score greater than 0.05 (default 'remove', or keep if ). 
 #' This requires that there are columns prepended with 'Intensity_' and 'score_' for each sample/timepoint in the 'dataset'.
 #' 
+#' @import dplyr
+#' @importFrom parallel makeCluster stopCluster detectCores
+#' @importFrom stringr str_detect
+#' 
 #' @return a pSILAC object.
 #'
 #' @export
@@ -33,7 +37,7 @@ pSILAC <- function(dataset, design, inputDataType = "spectronaut", requant="remo
     
     if (inputDataType %in% c("spectronaut", "diann", "fragpipe")) {
       
-      message("Reading input data.")
+      message(paste(Sys.time(), "Reading input data...", sep = " "))
       
       # For Spectronaut, DIA-NN, and FragPipe formats, do not use row names
       dataset <- read.delim(dataset, header = TRUE, row.names = NULL, stringsAsFactors = FALSE,
@@ -41,14 +45,14 @@ pSILAC <- function(dataset, design, inputDataType = "spectronaut", requant="remo
       
     } else if (inputDataType %in% c("maxquant", "openswath")) {
       
-      message("Reading input data.")
+      message(paste(Sys.time(), "Reading input data...", sep = " "))
       
       # For MaxQuant and OpenSWATH formats, treat the first column as row names
       dataset <- read.delim(dataset, header = TRUE, row.names = 1, stringsAsFactors = FALSE,
                             na.strings = c("", " ", "NA", "N.A.", "NaN", "n.a.", "Filtered", "na", "#DIV/0!"))
     }
   } else {
-    message("Using existing data frame as dataset.")
+    message(paste(Sys.time(), "Using existing data frame as dataset...", sep = " "))
   }
   
   # Load design data if a file path is provided
@@ -87,7 +91,7 @@ pSILAC <- function(dataset, design, inputDataType = "spectronaut", requant="remo
       stop(paste("The following required columns are missing from the dataset based on selected input data type:", paste(missing_columns, collapse = ", ")))
     }
     
-    message("Processing Spectronaut data.")
+    message(paste(Sys.time(), "Processing Spectronaut data...", sep = " "))
     
     dataset <- dataset %>% 
       dplyr::rename("Proteins" = PG.ProteinGroups) %>%
@@ -110,7 +114,7 @@ pSILAC <- function(dataset, design, inputDataType = "spectronaut", requant="remo
       stop(paste("The following required columns are missing from the dataset based on selected input data type:", paste(missing_columns, collapse = ", ")))
     }
     
-    message("Processing plexDIA data.")
+    message(paste(Sys.time(), "Processing DIA-NN data...", sep = " "))
     
     dataset <- dataset %>% 
       dplyr::rename("Proteins" = Protein.Group) %>%
@@ -121,7 +125,7 @@ pSILAC <- function(dataset, design, inputDataType = "spectronaut", requant="remo
     
     row.names(dataset) <- dataset$id
   }else {
-    message("Using dataset as provided without additional processing.")
+    message(paste(Sys.time(), "Using dataset as provided without additional processing...", sep = " "))
   }
   
   # Identify if dataset is in the expected format

@@ -4,12 +4,10 @@
 \alias{filterMonotone}
 \title{A wrapper function to filter data based on monotone filtering}
 \usage{
-filterMonotone(o, values_cutoff = 2, skip_time_point = 1)
+filterMonotone(o, skip_time_point = 1)
 }
 \arguments{
 \item{o}{a pSILAC object}
-
-\item{values_cutoff}{Specifies the minimum number of valid values to keep per pSILAC labeling series. Default is 2.}
 
 \item{skip_time_point}{Specifies how many early time points should be excluded from valid value filtering. Default is 1.}
 }

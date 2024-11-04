@@ -2,20 +2,26 @@
 % Please edit documentation in R/filterValidValues.R
 \name{filterValidValues}
 \alias{filterValidValues}
-\title{Filter data based on valid values}
+\title{Filter Data Based on Valid Values}
 \usage{
 filterValidValues(o, values_cutoff = 2, skip_time_point = 1)
 }
 \arguments{
-\item{o}{a pSILAC object.}
+\item{o}{A pSILAC object.}
 
-\item{values_cutoff}{Specifies the minimum number of valid values to keep per pSILAC labeling series (default is 2).}
+\item{values_cutoff}{Integer. The minimum number of valid values required to retain data within each pSILAC labeling series.
+Default is 2.}
 
-\item{skip_time_point}{Specifies how many early time points should be excluded from valid value filtering (default is 1).}
+\item{skip_time_point}{Integer. The number of early time points to exclude from filtering based on valid values. Default is 1.}
 }
 \value{
-The updated pSILAC object with filtered data.
+The pSILAC object `o`, with the `RIA`, `HOL`, and `NLI` data frames updated to reflect the applied filtering.
 }
 \description{
-A wrapper to apply the filterValidValues_skipTimePoints function to all pSILAC labeling series in the dataset.
+Applies the `filterValidValues_skipTimePoints` function to filter each pSILAC labeling series in the dataset. 
+This function processes multiple data frames within the pSILAC object (RIA, HOL, NLI) and filters data based on a specified 
+minimum number of valid values, while optionally skipping a defined number of initial time points.
+}
+\details{
+This function performs filtering on three specific data frames (`RIA`, `HOL`, and `NLI`) within a pSILAC object.
 }

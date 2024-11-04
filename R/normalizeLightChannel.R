@@ -40,7 +40,7 @@ normalizeLightChannel <- function(o, method="linear", timepoints=NULL, removeNAs
   
   # Normalize based on the specified method
   if(method == "geometric"){
-    message("Normalizing the light channel using geometric method.")
+    message(paste(Sys.time(), "Normalizing the light channel using geometric method...", sep = " "))
     # Calculate normalization factors using geometric scaling
     normFactors <- 1 / (sizeFactors / mean(sizeFactors))
     normFactors <- normFactors / exp(mean(log(normFactors)))  # Scale to stabilize mean
@@ -50,7 +50,7 @@ normalizeLightChannel <- function(o, method="linear", timepoints=NULL, removeNAs
     o$NLI <- as.data.frame(exp(t(t(log(o$light)) * normFactors)))
     
   } else {
-    message("Normalizing the light channel using linear method.")
+    message(paste(Sys.time(), "Normalizing the light channel using linear method...", sep = " "))
     # Calculate normalization factors using linear scaling
     normFactors <- exp(max(sizeFactors) - sizeFactors)
     
