@@ -4,12 +4,21 @@
 \alias{filterLinearRegression}
 \title{Filter Data Based on Linear Regression of ln(H/L + 1) Values}
 \usage{
-filterLinearRegression(o, skip_time_point = 1)
+filterLinearRegression(
+  o,
+  skip_time_point = 1,
+  R2_cutoff = 0.9,
+  p_cutoff = 0.05
+)
 }
 \arguments{
 \item{o}{A `pSILAC` object containing the experimental data, specifically the `hol` and `ria` data frames.}
 
-\item{skip_time_point}{Integer. Specifies how many early time points should be excluded from the linear regression analysis.
+\item{skip_time_point}{Integer. Specifies how many early time points should be excluded from the linear regression analysis.}
+
+\item{R2_cutoff}{R2 cutoff to remove the outliers (0.9 by default), only curves below this cutoff will be filtered}
+
+\item{p_cutoff}{Grubb's test P value cutoff to remove the outliers (0.05 by default)
 Must be 0 or 1. Default is 1.}
 }
 \value{

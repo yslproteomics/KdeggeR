@@ -9,7 +9,8 @@ calcAllRates(
   method = "combined",
   ag.metric = "mean",
   ag.weights = "both",
-  in.all = 2
+  in.all = 2,
+  ncores = 1
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ calcAllRates(
 \item{ag.weights}{the method to calculate weights for aggregation (default 'variance'). Ignored if ag.metric != 'mean'. See ?calcProteinsKloss}
 
 \item{in.all}{whether to use only peptides quantified in all samples. See ?calcProteinsKloss}
+
+\item{ncores}{number of cores to use}
 }
 \value{
 The updated pSILAC object.

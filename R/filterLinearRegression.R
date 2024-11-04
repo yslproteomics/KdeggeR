@@ -6,6 +6,8 @@
 #'
 #' @param o A `pSILAC` object containing the experimental data, specifically the `hol` and `ria` data frames.
 #' @param skip_time_point Integer. Specifies how many early time points should be excluded from the linear regression analysis.
+#' @param R2_cutoff R2 cutoff to remove the outliers (0.9 by default), only curves below this cutoff will be filtered
+#' @param p_cutoff Grubb's test P value cutoff to remove the outliers (0.05 by default)
 #' Must be 0 or 1. Default is 1.
 #' @importFrom dplyr filter select full_join
 #' @importFrom purrr reduce
@@ -25,7 +27,7 @@
 #' filtered_pSILAC <- filterLinearRegression(pSILAC_obj, skip_time_point = 1)
 #'
 #' @export
-filterLinearRegression <- function(o, skip_time_point = 1){
+filterLinearRegression <- function(o, skip_time_point = 1, R2_cutoff = 0.9, p_cutoff = 0.05){
   
   if (class(o) != "pSILAC") stop("Input data should be a pSILAC object.")
   
@@ -57,7 +59,7 @@ filterLinearRegression <- function(o, skip_time_point = 1){
       
       # Filter rows based on conditions and get IDs to remove
       remove_ids <- data_fit %>%
-        filter(time_point1 == TRUE, R2_full < 0.9, grubbs_pval < 0.05) %>%
+        filter(time_point1 == TRUE, R2_full < R2_cutoff, grubbs_pval < p_cutoff) %>%
         rownames_to_column("id") %>%
         pull(id)
       

@@ -1,111 +1,3 @@
-#' Calculate RIA-based k_loss
-#'
-#' Models the rate of loss of the light isotope (k_loss) on the basis of the relative isotope abundance (RIA).
-#'
-#' @param x The timepoints.
-#' @param y The RIA values corresponding to the timepoints.
-#' @param a The starting value of the k_loss for model-fitting.
-#'
-#' @return A numeric vector of length 4 containing: 
-#'	    the k_loss,
-#'	    the standard error of the k_loss, 
-#'	    the sum of residuals of the linear model, 
-#'	    the number of points on which the model was built.
-#'
-#' @export
-getRIAmod <- function(x,y,a=0.1){
-  if(length(x) != length(y))	stop("x and y are of different lengths!")
-  f <- function(x,a){ exp(-a*x) }
-  y <- as.numeric(y)
-  x2 <- x[which(!is.na(y))]
-  y <- y[which(!is.na(y))]
-  if(length(y)==1){
-    if(x2==0)	return(c(NA,NA,NA,1))
-    return( c(-log(y)/x2,NA,NA,1) )
-  }
-  fm <- try(suppressWarnings(nls(y~f(x2,a), start = c(a=a))), silent=T)
-  if(class(fm)=="nls"){
-    return(c(summary(fm)$coefficients[1:2],sum(residuals(fm)^2),length(x2)))
-  }
-  return(c(NA,NA,NA,length(x2)))
-}
-
-#' Calculate NLI-based k_loss
-#'
-#' Models the rate of loss of the light isotope (k_loss) on the basis of the normalized light intensities
-#'
-#' @param x The timepoints.
-#' @param y The normalized intensities values corresponding to the timepoints.
-#' @param y0 The intersect of the model. If NULL (default), will attempt to fit it.
-#' @param a The starting value of the k_loss for model-fitting.
-#'
-#' @return A numeric vector of length 4 containing: 
-#'	    the k_loss,
-#'	    the standard error of the k_loss, 
-#'	    the sum of residuals of the linear model, 
-#'	    the number of points on which the model was built.
-#'
-#' @export
-getNLImod <- function(x,y,y0=NULL,a=0.1){
-  if(length(x) != length(y))	stop("x and y are of different lengths!")
-  #f <- function(x,a,b){ b*(1-a)^x}
-  f <- function(x,a,b){ b*exp(-a*x) }
-  y <- as.numeric(y)
-  x2 <- x[which(!is.na(y))]
-  y <- y[which(!is.na(y))]
-  if(length(y)<1) return(c(NA,NA,NA,1))
-  if(length(y)<2){
-    if(is.null(y0) | x2==0 | y0==y) return(c(NA,NA,NA,1))
-    return( c(-log(y/y0)/x2,NA,NA,1) )
-  }
-  if(is.null(y0)){
-    fm <- try(suppressWarnings(nls(y~f(x2,a,b), start = c(a=a,b=max(y)))), silent=T)
-  }else{
-    fm <- try(suppressWarnings(nls(y~f(x2,a,y0), start = c(a=a))), silent=T)
-  }
-  if(class(fm)=="nls"){
-    return(c(summary(fm)$coefficients[1:2],sum(residuals(fm)^2),length(x2)))
-  }
-  return(c(NA,NA,NA,length(x2)))
-}
-
-#' Calculate H/L-based k_loss
-#'
-#' Models the rate of loss of the light isotope (k_loss) on the basis of the slope of the log-transformed isotope ratio.
-#'
-#' @param x The timepoints.
-#' @param y The ln(H/L+1) values corresponding to the timepoints.
-#' @param tryRobust Whether to try to fit a robust linear model (requires the 'MASS' library). Ignored with less than 10 data points.
-#'
-#' @return A numeric vector of length 4 containing: 
-#'	    the k_loss, i.e. ln(H/L+1)slope, 
-#'	    the standard error of the slope, 
-#'	    the sum of residuals of the linear model, 
-#'	    the number of points on which the model was built.
-#'
-#' @export
-getHoLmod <- function(x,y,tryRobust=F){
-  if(length(x) != length(y))	stop("x and y are of different lengths!")
-  y <- as.numeric(y)
-  x2 <- x[which(!is.na(y))]
-  y <- y[which(!is.na(y))]
-  if(length(y)==1){
-    if(x2==0)	return(c(NA,NA,NA,1))
-    return(c(y/x2,NA,NA,1))
-  }
-  if(tryRobust & length(y) >= 10){
-    fm <- try(rlm(y~x2+0), silent=T)
-    if(!"lm" %in% class(fm))	fm <- try(lm(y~x2+0), silent=T)
-  }else{
-    fm <- try(lm(y~x2+0), silent=T)
-  }
-  if("lm" %in% class(fm)){
-    return(c(as.numeric(summary(fm)$coefficients[1:2]),sum(residuals(fm)^2),length(x2)))
-  }
-  return(c(NA,NA,NA,length(x2)))
-}
-
-
 #' Calculate the Median of Non-Null, Non-Zero Values
 #'
 #' This function computes the median of a numeric vector, ignoring values 
@@ -123,15 +15,6 @@ getHoLmod <- function(x,y,tryRobust=F){
 #'          less than or equal to zero. It then calculates the median of the remaining 
 #'          values. If the resulting vector is empty, \code{NA} is returned.
 #'
-#' @examples
-#' # Example 1: Basic usage
-#' x <- c(0, 2, 5, NA, -1, 3)
-#' .medianNonNull(x)
-#'
-#' # Example 2: Vector with only negative and zero values
-#' y <- c(-1, 0, -5, NA)
-#' .medianNonNull(y)
-#'
 #' @export
 .medianNonNull <- function(x, na.rm = TRUE) {
   # Filter out values that are less than or equal to zero
@@ -146,150 +29,6 @@ getHoLmod <- function(x,y,tryRobust=F){
   return(NA)
 }
 
-
-#' Calculate k_loss for all peptides on the basis of normalized light intensities
-#'
-#' A wrapper to apply getNLImod to all peptides of the dataset.
-#'
-#' @param e a pSILAC object.
-#' @param startIntensity character; either "model" (fit the model with an intersect), "max" (use maximum H+L intensitiy as intersect), or "median" (use median of non-null H+L intensities). Default "median".
-#' @param ncores the number of cores to use (defaults to detected cores minus 1)
-#'
-#' @return The updated pSILAC object.
-#'
-#' @export
-calcNLIkloss <- function(e, startIntensity="median", ncores=NULL){
-  if(class(e) != "pSILAC")	stop("e should be a pSILAC object.")
-  if(!all(c("NLI","NCS") %in% names(e))){
-	message("Light channel not yet normalized; performing linear normalization...")
-	e <- normalizeLightChannel(e,method="linear")
-	message("Done; now fitting model on each peptide...")
-  }
-  startIntensity <- match.arg(startIntensity, c("median","max","model","secondmax"))
-  freeIntersect <- startIntensity == "model"
-  e$NLI.kloss <- NULL
-  x <- unique(e$design$time)
-  if(is.null(ncores)){
-    library(parallel)
-    ncores <- detectCores() - 1
-  }else{
-    if(ncores>1)	library(parallel)
-  }
-  if(ncores>1){
-    library(parallel)
-    cl <- makeCluster(ncores)
-    clusterExport(cl, c("getNLImod",".medianNonNull"))
-    clusterExport(cl, c("x","e","freeIntersect"), environment())
-  }
-  for(p in unique(e$design$sample)){
-    if(ncores > 1){
-      d <- as.data.frame(t(parApply(cl,cbind(apply(e$NCS[,which(e$design$sample==p)],1,na.rm=T,FUN=ifelse(startIntensity=="median",".medianNonNull",startIntensity)),e$NLI[,which(e$design$sample==p)]),1,FUN=function(y){ getNLImod(x,y[-1],ifelse(freeIntersect,NULL,y[1]))} )))
-    }else{
-      d <- as.data.frame(t(apply(cbind(apply(e$NCS[,which(e$design$sample==p)],1,na.rm=T,FUN=ifelse(startIntensity=="median",".medianNonNull",startIntensity)),e$NLI[,which(e$design$sample==p)]),1,freeIntersect=freeIntersect, FUN=function(y, freeIntersect){ getNLImod(x,y[-1],ifelse(freeIntersect,NULL,y[1]))} )))
-    }
-    colnames(d) <- paste(p,c("kloss","kloss.stderr","kloss.SSR","nbpoints"),sep=".")
-    row.names(d) <- row.names(e$NLI)
-    message(paste(" ...calculated ",sum(!is.na(d[,1]))," k_loss values for sample ",p," (",sum(is.na(d[,1]))," missing)",sep=""))
-    if(is.null(e$NLI.kloss)){
-      e$NLI.kloss <- d
-    }else{
-      e$NLI.kloss <- cbind(e$NLI.kloss,d)
-    }
-  }
-  if(ncores > 1) stopCluster(cl)
-  return(e)
-}
-
-
-#' Calculate RIA-based k_loss for all peptides
-#'
-#' A wrapper to apply getRIAmod to all peptides of the dataset.
-#'
-#' @param e a pSILAC object.
-#' @param ncores the number of cores to use (defaults to detected cores minus 1)
-#'
-#' @return The updated pSILAC object.
-#'
-#' @export
-calcRIAkloss <- function(e, ncores=NULL){
-  if(class(e) != "pSILAC")	stop("e should be a pSILAC object.")
-  e$RIA.kloss <- NULL
-  x <- unique(e$design$time)
-  if(is.null(ncores)){
-    library(parallel)
-    ncores <- detectCores() - 1
-  }else{
-    if(ncores>1)	library(parallel)
-  }
-  if(ncores>1){
-    library(parallel)
-    cl <- makeCluster(ncores)
-    clusterExport(cl, c("getRIAmod"))
-    clusterExport(cl, c("x","e"), environment())
-  }
-  for(p in unique(e$design$sample)){
-    if(ncores > 1){
-      d <- as.data.frame(t(parApply(cl,e$RIA[,which(e$design$sample==p)],1,FUN=function(y){ getRIAmod(x,y)} )))
-    }else{
-      d <- as.data.frame(t(apply(e$RIA[,which(e$design$sample==p)],1,FUN=function(y){ getRIAmod(x,y)} )))
-    }
-    colnames(d) <- paste(p,c("kloss","kloss.stderr","kloss.SSR","nbpoints"),sep=".")
-    row.names(d) <- row.names(e$RIA)
-    message(paste(" ...calculated ",sum(!is.na(d[,1]))," k_loss values for sample ",p," (",sum(is.na(d[,1]))," missing)",sep=""))
-    if(is.null(e$RIA.kloss)){
-      e$RIA.kloss <- d
-    }else{
-      e$RIA.kloss <- cbind(e$RIA.kloss,d)
-    }
-  }
-  if(ncores > 1) stopCluster(cl)
-  return(e)
-}
-
-#' Calculate ln(H/L+1)-based k_loss for all peptides
-#'
-#' A wrapper to apply getHoLmod to all peptides of the dataset.
-#'
-#' @param e a pSILAC object.
-#'
-#' @return The updated pSILAC object.
-#'
-#' @export
-calcHoLkloss <- function(e, ncores=NULL){
-  if(class(e) != "pSILAC")	stop("e should be a pSILAC object.")
-  e$hol.kloss <- NULL
-  x <- unique(e$design$time)
-  if(is.null(ncores)){
-    library(parallel)
-    ncores <- detectCores() - 1
-  }else{
-    if(ncores>1)	library(parallel)
-  }
-  if(ncores>1){
-    library(parallel)
-    cl <- makeCluster(ncores)
-    clusterExport(cl, c("getHoLmod"))
-    clusterExport(cl, c("x","e"), environment())
-  }
-  for(p in unique(e$design$sample)){
-    if(ncores > 1){
-      d <- as.data.frame(t(parApply(cl,e$hol[,which(e$design$sample==p)],1,FUN=function(y){ getHoLmod(x,y) })))
-    }else{
-      d <- as.data.frame(t(apply(e$hol[,which(e$design$sample==p)],1,FUN=function(y){ getHoLmod(x,y) })))
-    }
-    colnames(d) <- paste(p,c("kloss","kloss.stderr","kloss.SSR","nbpoints"),sep=".")
-    row.names(d) <- row.names(e$hol)
-    message(paste(" ...calculated ",sum(!is.na(d[,1]))," k_loss values for sample ",p," (",sum(is.na(d[,1]))," missing)",sep=""))
-    if(is.null(e$hol.kloss)){
-      e$hol.kloss <- d
-    }else{
-      e$hol.kloss <- cbind(e$hol.kloss,d)
-    }
-  }
-  if(ncores > 1) stopCluster(cl)
-  return(e)
-}
-
 #' Calculate all peptide and protein kloss.
 #'
 #' A wrapper that calls, in order, calcRIAkloss(), getHoLkloss() and calcProteinsKloss().
@@ -299,11 +38,12 @@ calcHoLkloss <- function(e, ncores=NULL){
 #' @param ag.metric the aggregation metric used for protein-level rates (default 'mean'). See ?calcProteinsKloss
 #' @param ag.weights the method to calculate weights for aggregation (default 'variance'). Ignored if ag.metric != 'mean'. See ?calcProteinsKloss
 #' @param in.all whether to use only peptides quantified in all samples. See ?calcProteinsKloss
+#' @param ncores number of cores to use
 #'
 #' @return The updated pSILAC object.
 #'
 #' @export
-calcAllRates <- function(e, method="combined", ag.metric="mean", ag.weights="both", in.all=2){
+calcAllRates <- function(e, method="combined", ag.metric="mean", ag.weights="both", in.all=2, ncores = 1){
   if(class(e) != "pSILAC")	stop("e should be a pSILAC object.")
   message("Calculating peptide-wise k_loss using the RIA-based method...")
   e <- calcRIAkloss(e)

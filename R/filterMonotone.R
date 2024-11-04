@@ -91,9 +91,19 @@ filterMonotone <- function(o, skip_time_point = 1){
   
   row.names(filter_NLI) <- filter_NLI$id
   
-  o$NLI <- filter_NLI %>%
+  NLI <- filter_NLI %>%
     dplyr::select(-id) %>%
     dplyr::select(all_of(original_order))
+  
+  o$NLI <- NLI
+  
+  # Filter the NCS data frame based on the filtered NLI
+  NCS_data <- o$NCS
+  
+  filter_NCS <- NCS_data[row.names(NLI), ]
+  filter_NCS[is.na(NLI)] <- NA
+  
+  o$NCS <- filter_NCS
   
   message(paste(Sys.time(), "Monotone trend filtering completed.", sep = " "))
   

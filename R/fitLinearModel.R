@@ -41,7 +41,6 @@
 #' @importFrom dplyr filter select
 #' @importFrom outliers grubbs.test
 #'
-#' @export
 fitLinearModel <- function(data, skip_time_point = 1, time_points = time_points){
   
   # to start with time point number 2

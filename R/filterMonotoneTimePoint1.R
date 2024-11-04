@@ -31,7 +31,7 @@ filterMonotoneTimePoint1 <- function(o){
   # Filter data based on valid values
   message(paste(Sys.time(), "Filtering the first time point of RIA data based on monotone decrease...", sep = " "))
   
-  split_ria <- lapply(split_ria, filter_monotone_trend_tp1only, mode = "RIA")
+  split_ria <- lapply(split_ria, filterMonotoneTp1Only, mode = "RIA")
   
   split_ria <- lapply(split_ria, function(x) { x$id <- row.names(x); return(x) })
   
@@ -56,7 +56,7 @@ filterMonotoneTimePoint1 <- function(o){
   # Filter data based on valid values
   message(paste(Sys.time(), "Filtering the first time point of ln H/L data based on monotone increase...", sep = " "))
   
-  split_hol <- lapply(split_hol, filter_monotone_trend_tp1only, mode = "HOL")
+  split_hol <- lapply(split_hol, filterMonotoneTp1Only, mode = "HOL")
   
   split_hol <- lapply(split_hol, function(x) { x$id <- row.names(x); return(x) })
   
@@ -89,11 +89,21 @@ filterMonotoneTimePoint1 <- function(o){
   
   row.names(filter_NLI) <- filter_NLI$id
   
-  o$NLI <- filter_NLI %>%
+  NLI <- filter_NLI %>%
     dplyr::select(-id) %>%
     dplyr::select(all_of(original_order))
   
-  message(paste(Sys.time(), "Completed", sep = " "))
+  o$NLI <- NLI
+  
+  # Filter the NCS data frame based on the filtered NLI
+  NCS_data <- o$NCS
+  
+  filter_NCS <- NCS_data[row.names(NLI), ]
+  filter_NCS[is.na(NLI)] <- NA
+  
+  o$NCS <- filter_NCS
+  
+  message(paste(Sys.time(), "Filtering completed", sep = " "))
   
   return(o)
 }

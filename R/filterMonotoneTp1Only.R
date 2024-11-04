@@ -15,7 +15,6 @@
 #'
 #' @return
 #' Returns a filtered data frame with the same columns as the input `data`, where the first time point is adjusted based on the specified monotonic trend criteria.
-#'
 filterMonotoneTp1Only <- function(data, mode = NULL){
   
   if(is.null(mode)){
