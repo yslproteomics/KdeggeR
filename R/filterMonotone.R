@@ -1,11 +1,17 @@
-#' @title A wrapper function to filter data based on monotone filtering
+#' @title Filter pSILAC Data Based on Monotonic Trend
 #'
-#' @description A wrapper to apply the filter_monotone_trend_tp1excluded function to all pSILAC labeling series in the dataset.
+#' @description This function is a wrapper for applying the `filter_monotone_trend_tp1excluded` function 
+#' to all pSILAC labeling series in the input dataset. It filters data frames within a pSILAC object (`RIA`, `hol`, and `NLI`)
+#' according to a monotonic trend, excluding specified early time points.
 #'
-#' @param o a pSILAC object
-#' @param skip_time_point Specifies how many early time points should be excluded from valid value filtering. Default is 1.
+#' @param o A `pSILAC` object containing the data to be filtered.
+#' @param skip_time_point Integer. Specifies the number of early time points to exclude from the valid value filtering process. 
+#' Default is 1.
+#'
 #' @importFrom dplyr filter select
-#' @return A filtered data frame.
+#' @importFrom purrr reduce
+#' @return The modified `pSILAC` object with filtered data frames `RIA`, `hol`, and `NLI`, maintaining the original column order.
+#'
 #' @export
 filterMonotone <- function(o, skip_time_point = 1){
   
@@ -92,79 +98,4 @@ filterMonotone <- function(o, skip_time_point = 1){
   message(paste(Sys.time(), "Monotone trend filtering completed.", sep = " "))
   
   return(o)
-}
-
-#' @title Filter data based on monotone filtering
-#'
-#' @description The input is a data frame  frame split into a list based on grouping defined in the design object. 
-#'
-#' @param data A data frame containing values from one pSILAC labeling series.
-#' @param skip_time_point Specifies how many early time points should be excluded from valid value filtering. Default is 1.
-#' @param mode Specifies whether the filtering is performed with the "RIA", "HOL", or "NLI" values. 
-#' @importFrom dplyr filter select
-#' @return A filtered data frame.
-#' @export
-filterMonotoneSkipTimePoints <- function(data, skip_time_point = 1, mode = NULL){
-  
-  # to start with time point number 2
-  t <- skip_time_point + 1
-  n <- ncol(data)
-  
-  # add na.omit to make the function robust against missing values
-  data$valid_values <- apply(data[t:n], 1, function(x){sum(!is.na(x))})
-  data$increasing_trend <- apply(data[t:n], 1, function(x){sum(diff(na.omit(x)) > 0)})
-  data$decreasing_trend <- apply(data[t:n], 1, function(x){sum(-diff(na.omit(x)) > 0)})
-  
-  # only keep those with at least some values
-  data <- data %>%
-    dplyr::filter(valid_values > 0)
-  
-  # generate two values vectors
-  values <- sort(unique(data$valid_values))
-  trend <- values - 1
-  
-  # split the data based on the valid values for a custom filtering
-  split_data_valid_values <- split.data.frame(data, f = as.factor(data$valid_values))
-  split_data_filter_values <- vector(mode = "list", length = length(split_data_valid_values))
-  
-  if(mode == "RIA"){
-    
-    for(i in 1:length(split_data_valid_values)){
-      
-      split_data_filter_values[[i]] <- split_data_valid_values[[i]] %>%
-        filter(valid_values == values[i] & decreasing_trend == trend[i])
-      
-    }
-    
-    data_filtered <- purrr::reduce(split_data_filter_values, rbind) %>%
-      select(-valid_values, -increasing_trend, -decreasing_trend)
-    
-  } else if(mode == "NLI"){
-    
-    for(i in 1:length(split_data_valid_values)){
-      
-      split_data_filter_values[[i]] <- split_data_valid_values[[i]] %>%
-        filter(valid_values == values[i] & decreasing_trend == trend[i])
-      
-    }
-    
-    data_filtered <- purrr::reduce(split_data_filter_values, rbind) %>%
-      select(-valid_values, -increasing_trend, -decreasing_trend)
-    
-  } else if(mode == "HOL"){
-    
-    for(i in 1:length(split_data_valid_values)){
-      
-      split_data_filter_values[[i]] <- split_data_valid_values[[i]] %>%
-        filter(valid_values == values[i] & increasing_trend == trend[i])
-      
-    }
-    
-    data_filtered <- purrr::reduce(split_data_filter_values, rbind) %>%
-      select(-valid_values, -increasing_trend, -decreasing_trend)
-    
-  }
-  
-  return(data_filtered)
-  
 }

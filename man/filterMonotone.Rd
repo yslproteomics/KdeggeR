@@ -2,18 +2,21 @@
 % Please edit documentation in R/filterMonotone.R
 \name{filterMonotone}
 \alias{filterMonotone}
-\title{A wrapper function to filter data based on monotone filtering}
+\title{Filter pSILAC Data Based on Monotonic Trend}
 \usage{
 filterMonotone(o, skip_time_point = 1)
 }
 \arguments{
-\item{o}{a pSILAC object}
+\item{o}{A `pSILAC` object containing the data to be filtered.}
 
-\item{skip_time_point}{Specifies how many early time points should be excluded from valid value filtering. Default is 1.}
+\item{skip_time_point}{Integer. Specifies the number of early time points to exclude from the valid value filtering process. 
+Default is 1.}
 }
 \value{
-A filtered data frame.
+The modified `pSILAC` object with filtered data frames `RIA`, `hol`, and `NLI`, maintaining the original column order.
 }
 \description{
-A wrapper to apply the filter_monotone_trend_tp1excluded function to all pSILAC labeling series in the dataset.
+This function is a wrapper for applying the `filter_monotone_trend_tp1excluded` function 
+to all pSILAC labeling series in the input dataset. It filters data frames within a pSILAC object (`RIA`, `hol`, and `NLI`)
+according to a monotonic trend, excluding specified early time points.
 }
