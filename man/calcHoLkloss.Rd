@@ -4,12 +4,14 @@
 \alias{calcHoLkloss}
 \title{Calculate Logarithmic H/L-based k_loss for all Peptides}
 \usage{
-calcHoLkloss(o, ncores = NULL)
+calcHoLkloss(o, ncores = NULL, tryRobust = FALSE)
 }
 \arguments{
 \item{o}{A `pSILAC` object, which contains the data for peptide H/L ratios and associated metadata.}
 
 \item{ncores}{An integer specifying the number of cores for parallel processing. If `NULL`, it defaults to using all available cores minus one.}
+
+\item{tryRobust}{Logical; if `TRUE`, attempts to fit a robust linear model (requires the `MASS` package). Ignored if fewer than 10 data points are available.}
 }
 \value{
 The updated `pSILAC` object, with a new `hol.kloss` slot containing the calculated k_loss values and associated statistics (standard error, sum of squared residuals, and number of points) for each peptide.

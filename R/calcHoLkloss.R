@@ -5,6 +5,7 @@
 #'
 #' @param o A `pSILAC` object, which contains the data for peptide H/L ratios and associated metadata.
 #' @param ncores An integer specifying the number of cores for parallel processing. If `NULL`, it defaults to using all available cores minus one.
+#' @param tryRobust Logical; if `TRUE`, attempts to fit a robust linear model (requires the `MASS` package). Ignored if fewer than 10 data points are available.
 #'
 #' @return The updated `pSILAC` object, with a new `hol.kloss` slot containing the calculated k_loss values and associated statistics (standard error, sum of squared residuals, and number of points) for each peptide.
 #'
@@ -14,7 +15,7 @@
 #' A summary message is displayed for each sample, indicating the number of successfully calculated k_loss values and any missing values.
 #'
 #' @export
-calcHoLkloss <- function(o, ncores = NULL) {
+calcHoLkloss <- function(o, ncores = NULL, tryRobust = FALSE) {
   if (class(o) != "pSILAC") stop("o should be a pSILAC object.")
   
   o$hol.kloss <- NULL
@@ -40,7 +41,7 @@ calcHoLkloss <- function(o, ncores = NULL) {
       d <- as.data.frame(t(apply(o$hol[, which(o$design$sample == p)], 1, FUN = function(y) { getHoLmod(x, y) })))
     }
     
-    colnames(d) <- paste(p, c("kloss", "kloss.stderr", "kloss.SSR", "nbpoints"), sep = ".")
+    colnames(d) <- paste(p, c("kloss", "kloss.stderr", "kloss.SSR", "R_squared", "nbpoints"), sep = ".")
     row.names(d) <- row.names(o$hol)
     
     message(sprintf("...calculated %d k_loss values for sample %s (%d missing)", sum(!is.na(d[, 1])), p, sum(is.na(d[, 1]))))

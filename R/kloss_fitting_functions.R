@@ -84,7 +84,7 @@ getNLImod <- function(x,y,y0=NULL,a=0.1){
 #'	    the number of points on which the model was built.
 #'
 #' @export
-getHoLmod <- function(x,y,tryRobust=F){
+getHoLmod_old <- function(x,y,tryRobust=F){
   if(length(x) != length(y))	stop("x and y are of different lengths!")
   y <- as.numeric(y)
   x2 <- x[which(!is.na(y))]
