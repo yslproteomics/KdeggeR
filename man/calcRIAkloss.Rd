@@ -4,7 +4,7 @@
 \alias{calcRIAkloss}
 \title{Calculate RIA-based k_loss for All Peptides in a Dataset}
 \usage{
-calcRIAkloss(o, ncores = detectCores() - 1)
+calcRIAkloss(o, ncores = NULL)
 }
 \arguments{
 \item{o}{A `pSILAC` object containing the dataset to be processed. 

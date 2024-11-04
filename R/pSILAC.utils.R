@@ -161,10 +161,26 @@ reorderSamples <- function(o, newOrder){
 }
 
 
-medianNorm <- function(x, na.rm=T){
-  sizeFactors <- as.numeric(apply(x,2,na.rm=na.rm,FUN=median))
-  as.data.frame(t( mean(sizeFactors)*t(x)/sizeFactors ))
+#' Normalize Data by Median Scaling
+#'
+#' This function normalizes columns of a matrix or data frame by scaling each column to its median.
+#'
+#' @param x A numeric matrix or data frame to be normalized.
+#' @param na.rm Logical; if `TRUE`, NA values are removed when calculating medians. Default is `TRUE`.
+#'
+#' @return A data frame with normalized values, where each column is scaled by its median to ensure comparability across samples.
+#'
+#' @details
+#' The function computes a size factor for each column based on the median value, then scales each value by these factors.
+#' This normalization method is often used to adjust for variations in sample size or sequencing depth.
+#'
+#'
+#' @export
+medianNorm <- function(x, na.rm = TRUE) {
+  sizeFactors <- as.numeric(apply(x, 2, na.rm = na.rm, FUN = median))
+  as.data.frame(t(mean(sizeFactors) * t(x) / sizeFactors))
 }
+
 
 normalizeProteinKloss <- function(o, dilution.rate=NULL, removeNAs=T){
   if(class(o) != "pSILAC")	stop("o should be a pSILAC object.")

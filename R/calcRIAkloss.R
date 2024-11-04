@@ -24,10 +24,18 @@
 #'
 #' @importFrom parallel makeCluster stopCluster detectCores parApply clusterExport
 #' @export
-calcRIAkloss <- function(o, ncores = detectCores() - 1) {
+calcRIAkloss <- function(o, ncores = NULL) {
+  
   if (class(o) != "pSILAC") stop("o should be a pSILAC object.")
   o$RIA.kloss <- NULL
   x <- unique(o$design$time)
+  
+  if (is.null(ncores)) {
+    library(parallel)
+    ncores <- detectCores() - 1
+  } else if (ncores > 1) {
+    library(parallel)
+  }
   
   # Create cluster if needed
   if (ncores > 1) {
