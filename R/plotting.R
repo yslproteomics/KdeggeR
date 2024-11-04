@@ -426,16 +426,45 @@ plotKlossDensities <- function(o,remove.NAs=T,xlim=c(0,0.1),main="Protein-level 
   abline(h=median(apply(log(k),2,na.rm=T,FUN=median)),lty="dashed",col="grey")
 }
 
-plotIntensityDistribution <- function(o, channel="light", ...){
-  if(class(o) != "pSILAC")	stop("'object' should be a pSILAC object.")
-  channel <- match.arg(channel, c("heavy","light","sum","NLI"))
-  dat <- switch( channel,
-            light=o$light,
-            heavy=o$heavy,
-            sum=.getChannelSum(o),
-            NLI=o$NLI)
-  if(is.null(dat))   dat <- normalizeLightChannel(o)$NLI
+#' Plot Intensity Distribution of pSILAC Channels
+#'
+#' This function plots the log-transformed intensity distribution for a specified channel in a pSILAC object.
+#' It allows visualization of intensity distributions across different conditions, such as time points.
+#'
+#' @param o A `pSILAC` object containing intensity data.
+#' @param channel A character string specifying the channel to plot. Options are `"heavy"`, `"light"`, `"sum"`, or `"NLI"`.
+#'   Default is `"light"`.
+#' @param ... Additional arguments passed to `gdensity` for customizing the plot.
+#'
+#' @details
+#' The function uses the specified channel's intensity data from the pSILAC object `o`. If `channel = "sum"`, the sum of the
+#' `heavy` and `light` channels is plotted. If `channel = "NLI"` and `NLI` data is not already in `o`, it will be calculated 
+#' using `normalizeLightChannel`. The plot colors are determined by the time points in `o$design$time`.
+#'
+#' @examples
+#' plotIntensityDistribution(o, channel = "light")
+#'
+#' @export
+plotIntensityDistribution <- function(o, channel = "light", ...) {
+  if (class(o) != "pSILAC") stop("'o' should be a pSILAC object.")
+  channel <- match.arg(channel, c("heavy", "light", "sum", "NLI"))
+  
+  # Select data based on channel
+  dat <- switch(channel,
+                light = o$light,
+                heavy = o$heavy,
+                sum = .getChannelSum(o),
+                NLI = o$NLI)
+  
+  # Compute NLI if necessary
+  if (is.null(dat)) dat <- normalizeLightChannel(o)$NLI
+  
+  # Set colors for the plot based on time points
   cols <- plColorMap(o$design$time)
-  gdensity(log(dat),xlab="log(intensity)",cols=cols,...)
-  legend("topright", bty="n", fill=unique(cols), legend=paste(unique(o$design$time),"hours"))
+  
+  # Plot intensity distribution
+  gdensity(log(dat), xlab = "log(intensity)", cols = cols, ...)
+  
+  # Add legend
+  legend("topright", bty = "n", fill = unique(cols), legend = paste(unique(o$design$time), "hours"))
 }

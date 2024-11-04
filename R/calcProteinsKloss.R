@@ -18,7 +18,7 @@
 #'   \describe{
 #'     \item{`"mean"` (default)}{Calculates the mean of peptide-level k_loss values; if `ag.weights` is provided, a weighted mean is calculated.}
 #'     \item{`"median"`}{Calculates the median of peptide-level k_loss values.}
-#'     \item{`"remodel"`}{Uses the `modelProteinsKloss` function to re-fit protein models using all peptide-level data.}
+#'     \item{`"remodel"`}{Uses the `modelProteinsKloss` function to re-fit protein models using all peptide-level data. Does not work in the current version}
 #'   }
 #'
 #' @param ag.weights Character string defining the weighting method for the weighted mean. Ignored if `ag.metric` is not set to `"mean"`. Options are:
@@ -61,6 +61,7 @@ calcProteinsKloss <- function(o, method = "combined", ag.metric = "mean", ag.wei
   
   # If 'remodel' method is used, call modelProteinsKloss and return results
   if (ag.metric == "remodel" & method != "complement") {
+    stop("Protein k_loss remodeling not yet enabled.")
     return(modelProteinsKloss(o, method = method, ag.weights = ag.weights, in.all = in.all, removeOutliers = removeOutliers, ncores = ncores, tryRobust = tryRobust, returnKlossTableOnly = returnKlossTableOnly, returnSD = returnSD))
   }
   
