@@ -2,16 +2,24 @@
 % Please edit documentation in R/calcHoLkloss.R
 \name{calcHoLkloss}
 \alias{calcHoLkloss}
-\title{Calculate ln(H/L+1)-based k_loss for all peptides}
+\title{Calculate Logarithmic H/L-based k_loss for all Peptides}
 \usage{
-calcHoLkloss(e, ncores = NULL)
+calcHoLkloss(o, ncores = NULL)
 }
 \arguments{
-\item{e}{a pSILAC object.}
+\item{o}{A `pSILAC` object, which contains the data for peptide H/L ratios and associated metadata.}
+
+\item{ncores}{An integer specifying the number of cores for parallel processing. If `NULL`, it defaults to using all available cores minus one.}
 }
 \value{
-The updated pSILAC object.
+The updated `pSILAC` object, with a new `hol.kloss` slot containing the calculated k_loss values and associated statistics (standard error, sum of squared residuals, and number of points) for each peptide.
 }
 \description{
-A wrapper to apply getHoLmod to all peptides of the dataset.
+This function calculates the ln(H/L + 1)-based k_loss for each peptide in a `pSILAC` dataset by applying the `getHoLmod` function. 
+It handles data across multiple time points and samples, with optional parallel processing to speed up computations.
+}
+\details{
+The function iterates over each unique sample in the dataset and calculates k_loss values for each peptide, either in parallel or sequentially. 
+For each sample, the calculated metrics include the k_loss, its standard error, sum of squared residuals, and the number of points used in the calculation.
+A summary message is displayed for each sample, indicating the number of successfully calculated k_loss values and any missing values.
 }
