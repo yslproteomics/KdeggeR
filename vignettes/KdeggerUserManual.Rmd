@@ -51,7 +51,7 @@ library(KdeggeR)
 # Required files 
 1. Precursor-level data exported in .tsv format
 2. Design table saved in .tsv format - a template can be generated (see below)
-3. OPTIONAL: Table with experimentally determined Kcd values in .tsv format
+3. OPTIONAL: Table with experimentally determined kcd values in .tsv format
 
 # Generate pSILAC object
 
@@ -64,23 +64,23 @@ See provided examples for designs with a replicate and non-replicate design on t
 ```{r generate design table}
 data_file <- "i:/_R/pSILAC_LiuLab/KdeggeR/data/example_data_pSILAC_SN19_A2780Cis_Nor_full_truncated.tsv"
 
-# Generate the `design_table_template.xls` file, inputDataType needs to be specified
-# See ?generateDesignTemplate for all available parameters
+# See ?generateDesignTemplate
 KdeggeR::generateDesignTemplate(dataset = data_file, inputDataType = "spectronaut")
 ```
 
 ## Generate pSILAC object without replicate design
 
-```{r generate pSILAC object}
+```{r generate pSILAC object, eval = FALSE}
 design_table_customized <- "i:/_R/pSILAC_LiuLab/KdeggeR/data/example_design_table_pSILAC_SN19_A2780Cis_Nor.txt"
 
-# See ?generatepSILACObject for all available parameters
+# See ?generatepSILACObject
 o <- KdeggeR::generatepSILACObject(dataset = data_file, 
-                                   design = design_table_updated, 
+                                   design = design_table_customized, 
                                    inputDataType = "spectronaut", # inputDataType needs to be correctly specified
                                    aggregate.replicates = NA, # if NA, replicates are not aggregated
                                    ncores = 1, # can be increased for faster processing, use parallel:: detectCores() to detect available cores
                                    noiseCutoff = 8) # intensity cutoff recommended for Spectronaut output data
+
 ```
 
 ## Generate pSILAC object with replicate design
@@ -89,9 +89,88 @@ The replicates will be averaged during the pSILAC object generation. This design
 
 It is recommended to use cross-run normalized data if replication aggregation is intended. 
 
-```{r generate pSILAC object with replicates}
+```{r generate pSILAC object with replicates, eval = FALSE}
 design_table_customized_replicates <- "i:/_R/pSILAC_LiuLab/KdeggeR/data/example_design_table_pSILAC_SN19_A2780Cis_Nor_replicate_design.txt"
 
-o_agg <- KdeggeR::generatepSILACObject(dataset = data_file, design = design_table_updated, inputDataType = "spectronaut", aggregate.replicates = "median")
+o_agg <- KdeggeR::generatepSILACObject(dataset = data_file, 
+                                       design = design_table_customized_replicates, 
+                                       inputDataType = "spectronaut", 
+                                       aggregate.replicates = "median")
+
 ```
 
+# Filter data
+
+```{r filter input data, eval = FALSE}
+o <- filterValidValues(o, values_cutoff = 2, skip_time_point = 1)
+o <- filterMonotone(o, skip_time_point = 1)
+o <- filterMonotoneTimePoint1(o)
+o <- filterLinearRegression(o, skip_time_point = 1, R2_cutoff = 0.9, p_cutoff = 0.05)
+```
+
+# Fit models to estimate Kloss
+
+## Calculate all rates
+
+The `calcAllRates()` function is a wrapper function that runs precursor kloss calculation using the RIA, ln(H/L +1), and NLI data. 
+
+Then it aggregates the precursor-level estimates into protein kloss estimates using the selected method.
+
+```{r fit all rates, eval = FALSE}
+o <- calcAllRates(o, method = "complement", 
+                  ag.metric = "mean", 
+                  ag.weights = "both")
+```
+
+## Calculate specific rates
+
+The model fitting functions can be also run separately using the following functions. 
+
+```{r fit selected rates, eval = FALSE}
+# Precursor-level kloss
+o <- calcRIAkloss(o, ncores = 1)
+o <- calcNLIkloss(o, startIntensity = "max", ncores = 1)
+o <- calcHoLkloss(o, tryRobust = FALSE, ncores = 1)
+
+# Aggregate to protein-level kloss
+o <- calcProteinsKloss(o, method = "complement", 
+                       ag.metric = "mean", 
+                       ag.weights = "both", 
+                       ncores = 1, 
+                       returnKlossTableOnly = F, 
+                       returnSD = F )
+
+# Aggregate to protein-level kloss, export protein-level kloss table in a new object
+protein_kloss_table <- calcProteinsKloss(o, method = "complement", 
+                       ag.metric = "mean", 
+                       ag.weights = "both", 
+                       ncores = 1, 
+                       returnKlossTableOnly = T, 
+                       returnSD = F )
+```
+
+# Calculate kdeg 
+
+## Import experimentally-determined kcd values
+
+## Estimate kperc
+
+## Calculate kdeg
+
+## Calculate t(1/2)
+
+# Visulize Results
+
+## Precursor/peptide
+
+### Plot precursor RIA model
+
+### Plot precursor NLI model
+
+### Plot precursor ln(H/L +1) model
+
+## Protein
+
+### Plot protein model
+
+### Plot protein summary
