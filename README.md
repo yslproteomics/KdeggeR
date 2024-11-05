@@ -9,6 +9,13 @@ A detailed tutorial coming soon. :)
 
 ## How to Install 
 
+To install all dependencies. 
+
+```{r}
+if(!require(pacman)) install.packages("pacman")
+pacman::p_load(dplyr, outliers, parallel, purrr, stats, stringr)
+```
+
 To install the package. 
 
 ```{r}
