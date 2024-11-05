@@ -24,7 +24,7 @@ To install the package.
 
 ```{r}
 library("devtools")
-install_github("yslproteomics/KdeggeR")
+install_github("yslproteomics/KdeggeR", build_vignettes = TRUE)
 ```
 
 ## How to Cite
