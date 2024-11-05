@@ -14,6 +14,9 @@ To install all dependencies.
 ```{r}
 if(!require(pacman)) install.packages("pacman")
 pacman::p_load(dplyr, outliers, parallel, purrr, stats, stringr)
+
+# Optional R package for robust linear model fitting
+install.packages("MASS")
 ```
 
 To install the package. 
