@@ -87,10 +87,11 @@ o <- KdeggeR::generatepSILACObject(dataset = data_file,
 
 The replicates will be averaged during the pSILAC object generation. This design is advisable when processing experiments with, e.g., replicate injections or dish replicates which are not meant to be analyzed separately.
 
-It is recommended to use cross-run normalized data. 
+It is recommended to use cross-run normalized data if replication aggregation is intended. 
 
-```{r generate pSILAC object}
+```{r generate pSILAC object with replicates}
 design_table_customized_replicates <- "i:/_R/pSILAC_LiuLab/KdeggeR/data/example_design_table_pSILAC_SN19_A2780Cis_Nor_replicate_design.txt"
 
-o_aggregate <- KdeggeR::generatepSILACObject(dataset = data_file, design = design_table_updated, inputDataType = "spectronaut", aggregate.replicates = "median")
+o_agg <- KdeggeR::generatepSILACObject(dataset = data_file, design = design_table_updated, inputDataType = "spectronaut", aggregate.replicates = "median")
 ```
+
