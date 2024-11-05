@@ -1,0 +1,96 @@
+---
+title: "KdeggeR user manual"
+author: "Barbora Salovska"
+date: "Last edited `r format(Sys.Date(), '%A %d %B %Y')`"
+output:
+  rmdformats::readthedown:
+    code_folding: show
+    self_contained: true
+    thumbnails: false
+    lightbox: false
+    number_sections: yes
+    toc_depth: 3
+    toc_float: yes
+pkgdown:
+  as_is: true    
+vignette: >
+  %\VignetteIndexEntry{KdeggerUserManual}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Load the package
+
+## Install dependencies
+
+```{r install dependencies, eval = FALSE}
+if(!require(pacman)) install.packages("pacman")
+pacman::p_load(devtools, dplyr, outliers, parallel, purrr, stats, stringr)
+```
+
+## Install KdeggeR
+
+```{r install KdeggeR, eval = FALSE}
+library("devtools")
+install_github("yslproteomics/KdeggeR")
+```
+
+## Load KdeggeR
+
+```{r load KdeggeR}
+library(KdeggeR)
+```
+
+# Required files 
+1. Precursor-level data exported in .tsv format
+2. Design table saved in .tsv format - a template can be generated (see below)
+3. OPTIONAL: Table with experimentally determined Kcd values in .tsv format
+
+# Generate pSILAC object
+
+## Generate design template
+
+This function takes the MS data processing results and generate a template *design_table_template.xls* file with required columns. 
+This can be completed manually by the user, saved as a .tsv file, and used as an input for the `generatepSILACObject()` function.
+See provided examples for designs with a replicate and non-replicate design on the data structure. 
+
+```{r generate design table}
+data_file <- "i:/_R/pSILAC_LiuLab/KdeggeR/data/example_data_pSILAC_SN19_A2780Cis_Nor_full_truncated.tsv"
+
+# Generate the `design_table_template.xls` file, inputDataType needs to be specified
+# See ?generateDesignTemplate for all available parameters
+KdeggeR::generateDesignTemplate(dataset = data_file, inputDataType = "spectronaut")
+```
+
+## Generate pSILAC object without replicate design
+
+```{r generate pSILAC object}
+design_table_customized <- "i:/_R/pSILAC_LiuLab/KdeggeR/data/example_design_table_pSILAC_SN19_A2780Cis_Nor.txt"
+
+# See ?generatepSILACObject for all available parameters
+o <- KdeggeR::generatepSILACObject(dataset = data_file, 
+                                   design = design_table_updated, 
+                                   inputDataType = "spectronaut", # inputDataType needs to be correctly specified
+                                   aggregate.replicates = NA, # if NA, replicates are not aggregated
+                                   ncores = 1, # can be increased for faster processing, use parallel:: detectCores() to detect available cores
+                                   noiseCutoff = 8) # intensity cutoff recommended for Spectronaut output data
+```
+
+## Generate pSILAC object with replicate design
+
+The replicates will be averaged during the pSILAC object generation. This design is advisable when processing experiments with, e.g., replicate injections or dish replicates which are not meant to be analyzed separately.
+
+It is recommended to use cross-run normalized data. 
+
+```{r generate pSILAC object}
+design_table_customized_replicates <- "i:/_R/pSILAC_LiuLab/KdeggeR/data/example_design_table_pSILAC_SN19_A2780Cis_Nor_replicate_design.txt"
+
+o_aggregate <- KdeggeR::generatepSILACObject(dataset = data_file, design = design_table_updated, inputDataType = "spectronaut", aggregate.replicates = "median")
+```

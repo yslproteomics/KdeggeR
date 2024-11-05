@@ -1,0 +1,12 @@
+citeHeader("to cite this package in a publication, please use:")
+
+citation <- bibentry(
+  bibtype = "Article",
+  author = person("Barbora", "Salovska"),
+  title = "A Comprehensive and Robust Multiplex-DIA Workflow Profiles Protein Turnover Regulations Associated with Cisplatin Resistance",
+  journal = "bioRxiv",
+  year = "2024",
+  doi = "10.1101/2024.10.28.620709"
+)
+
+citEntry(citation)

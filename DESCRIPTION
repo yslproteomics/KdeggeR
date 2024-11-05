@@ -1,16 +1,20 @@
 Package: KdeggeR
 Type: Package
-Title: Secondary analysis of pulse SILAC data
+Title: Peptide and Protein Turnover estimation from pulse SILAC DIA-MS experiments. 
 Version: 1.2
 Date: 2024-10-29
 Author: Pierre-Luc Germain, Barbora Salovska
 Maintainer: Barbora Salovska <salovska.b@gmail.com>
-Description: Secondary analysis of pulse SILAC data
-License: GPL
+Description: Secondary analysis of pulse SILAC data generated using multiplex DIA-MS. For citation details, see `citation("KdeggeR")`. 
+License: MIT
 Encoding: UTF-8
 RoxygenNote: 7.3.2
 Imports:
     dplyr,
     purrr,
     knitr
+Suggests: 
+    rmarkdown, 
+    rmdformats, 
+    MASS
 VignetteBuilder: knitr
