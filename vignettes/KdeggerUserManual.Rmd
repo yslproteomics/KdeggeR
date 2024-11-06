@@ -61,7 +61,7 @@ This function takes the MS data processing results and generate a template *desi
 This can be completed manually by the user, saved as a .tsv file, and used as an input for the `generatepSILACObject()` function.
 See provided examples for designs with a replicate and non-replicate design on the data structure. 
 
-```{r generate design table}
+```{r generate design table, eval = FALSE}
 # use libpath here
 data_file <- paste(.libPaths()[1], "KdeggeR/data/example_data_pSILAC_SN19_A2780Cis_Nor_full_truncated.tsv", sep = "/")
 

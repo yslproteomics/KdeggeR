@@ -10,3 +10,4 @@ inst/doc
 /doc/
 /Meta/
 load_data.R
+/data-raw/
