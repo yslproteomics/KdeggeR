@@ -24,6 +24,8 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+
+library(dplyr)
 ```
 
 # Load the package
@@ -32,7 +34,10 @@ knitr::opts_chunk$set(
 
 ```{r install dependencies, eval = FALSE}
 if(!require(pacman)) install.packages("pacman")
-pacman::p_load(devtools, dplyr, outliers, parallel, purrr, stats, stringr)
+pacman::p_load(devtools, dplyr, outliers, parallel, purrr, stats, stringr, tibble)
+
+# Optional
+# install.packages("MASS")
 ```
 
 ## Install KdeggeR
@@ -49,25 +54,100 @@ library(KdeggeR)
 ```
 
 # Required files 
+
 1. Precursor-level data exported in .tsv format
-2. Design table saved in .tsv format - a template can be generated (see below)
+2. Design table saved in .tsv format
 3. OPTIONAL: Table with experimentally determined kcd values in .tsv format
 
-# Generate pSILAC object
+## Data
+  - The data can be either provided as a path to the file or can be a data.frame already loaded in the R environment.
+  - The data must contain light and heavy intensity columns, a protein id column, and a precursor id column. Other columns are optional. 
+  - If the data has been pre-loaded in the R environment, the data must have row names corresponding to precursor ids.
+  - See examples in the code chunks below. 
 
-## Generate design template
+### Spectronaut data, labeled workflow (recommended)
+  - Required columns: PG.ProteinGroups, EG.PrecursorId
+  - Light intensities: columns ending with "EG.Channel1Quantity"
+  - Heavy intensities: columns ending with "EG.Channel2Quantity"
+  - Example data are provided, see `KdeggeR::example_spectronaut` to check the expected data structure
+  
+```{r example data lbl}
+KdeggeR::example_spectronaut %>%
+  dplyr::glimpse()
+```
+ 
+### Spectronaut data, ISW workflow 
+    - In SN19, the same columns can be used
+    - In older SN versions: 
+      - The light channel quantities are contained in the "EG.ReferenceQuantity"
+      - The heavy channel quantities in the "EG.TargetQuantity"
+      - In this case, rename the columns, so they match to the expected format, e.g., using the code in the chunk below
+      
 
-This function takes the MS data processing results and generate a template *design_table_template.xls* file with required columns. 
-This can be completed manually by the user, saved as a .tsv file, and used as an input for the `generatepSILACObject()` function.
-See provided examples for designs with a replicate and non-replicate design on the data structure. 
+```{r example data isw, eval = FALSE}
 
+KdeggeR::example_spectronaut_isw %>%
+  dplyr::rename_with(~gsub("EG.TargetQuantity", "EG.Channel2Quantity", .), .cols = dplyr::ends_with("EG.TargetQuantity")) %>%
+  dplyr::rename_with(~gsub("EG.ReferenceQuantity", "EG.Channel1Quantity", .), .cols = dplyr::ends_with("EG.ReferenceQuantity"))
+```
+
+## Design table
+  - The design can be either provided as a path to the file or can be a data.frame already loaded in the R environment.
+  - If the data has been pre-loaded in the R environment, the table must have row names corresponding to raw file names.
+  - The table must have a *sample* column and *time* column (numeric, in hours). 
+  
+  - Optionally, *replicates* (numeric) can be specified for a replicate design analysis.
+  - Note, if there are replicates to be averaged, they should have the same value in the column 'sample' of the design table. 
+  - Optionally, the *color* column can be specified to customize data plotting in post-analysis. 
+  - Optionally, the *condition* column can be specified. 
+
+### Design table without replicate design
+  - If there are *no replicates* or there are supposed to be analyzed separately, the *sample* column needs to be provided accordingly. 
+
+```{r example design lbl}
+# Examine the data structure
+KdeggeR::example_spectronaut_design %>%
+  dplyr::glimpse()
+
+# Examine the row names
+row.names(KdeggeR::example_spectronaut_design)
+```
+
+### Design table with replicate design
+  - If there are replicates that needs to be combined before analysis, the *sampl* column needs to be provided accordingly to group the samples. 
+  - The *replicate* column must contain information about the replicates (numeric). 
+  - Note, if replicate design is used, the data will be combined in the beginning of the processing, and all subsequent steps are performed with the averaged data (such as RIA calculation, data filtering, kloss modeling, etc..). 
+
+```{r example design lbl replicates}
+# Examine the data structure
+KdeggeR::example_spectronaut_design_replicates %>%
+  dplyr::glimpse()
+
+# Examine the row names
+row.names(KdeggeR::example_spectronaut_design_replicates)
+```
+
+### Generate design table based on the results file
+
+  - The "generate_design_template()" function can be used to generate a customizable design table template based on the data file. 
+  - In this case, a path to the data file must be provided. 
+  - A tsv file is exported, which can be customized by the user, saved as a .tsv file and used as an input for the `generatepSILACObject()` function.
+  
 ```{r generate design table, eval = FALSE}
 # use libpath here
-data_file <- paste(.libPaths()[1], "KdeggeR/data/example_data_pSILAC_SN19_A2780Cis_Nor_full_truncated.tsv", sep = "/")
+data_file <- paste(.libPaths()[1], "KdeggeR/data-raw/example_data_pSILAC_SN19_A2780Cis_Nor_full_truncated.tsv", sep = "/")
 
 # See ?generateDesignTemplate
 KdeggeR::generateDesignTemplate(dataset = data_file, inputDataType = "spectronaut")
 ```
+
+## kcd table
+
+  - A simple kcd table with two columns can be provided to be used for kdeg calculation. 
+  - The table must contain a "sample" column identical to the "sample" column in the design table, and 
+  - a "kcd" column containing experimentally-derived cell doubling rates
+
+# Generate pSILAC object
 
 ## Generate pSILAC object without replicate design
 

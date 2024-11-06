@@ -5,7 +5,7 @@
 \alias{example_spectronaut_design}
 \title{Example deign table for the A2780 pSILAC dataset (analyzed in Spectronaut 19)}
 \format{
-An object of class \code{data.frame} with 24 rows and 6 columns.
+An object of class \code{data.frame} with 24 rows and 5 columns.
 }
 \usage{
 example_spectronaut_design
