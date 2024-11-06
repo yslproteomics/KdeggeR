@@ -5,9 +5,8 @@
 *.Rproj
 /.Rproj.user
 .Rbuildignore
-/data/example_data_pSILAC_SN19_A2780Cis_Nor_full.tsv
+/data-raw/example_data_pSILAC_SN19_A2780Cis_Nor_full.tsv
 inst/doc
 /doc/
 /Meta/
 load_data.R
-/data-raw/
