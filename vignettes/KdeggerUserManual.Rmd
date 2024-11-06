@@ -62,7 +62,8 @@ This can be completed manually by the user, saved as a .tsv file, and used as an
 See provided examples for designs with a replicate and non-replicate design on the data structure. 
 
 ```{r generate design table}
-data_file <- "i:/_R/pSILAC_LiuLab/KdeggeR/data/example_data_pSILAC_SN19_A2780Cis_Nor_full_truncated.tsv"
+# use libpath here
+data_file <- paste(.libPaths()[1], "KdeggeR/data/example_data_pSILAC_SN19_A2780Cis_Nor_full_truncated.tsv", sep = "/")
 
 # See ?generateDesignTemplate
 KdeggeR::generateDesignTemplate(dataset = data_file, inputDataType = "spectronaut")
@@ -71,7 +72,7 @@ KdeggeR::generateDesignTemplate(dataset = data_file, inputDataType = "spectronau
 ## Generate pSILAC object without replicate design
 
 ```{r generate pSILAC object, eval = FALSE}
-design_table_customized <- "i:/_R/pSILAC_LiuLab/KdeggeR/data/example_design_table_pSILAC_SN19_A2780Cis_Nor.txt"
+design_table_customized <- paste(.libPaths()[1], "KdeggeR/data/example_design_table_pSILAC_SN19_A2780Cis_Nor.txt", sep = "/")
 
 # See ?generatepSILACObject
 o <- KdeggeR::generatepSILACObject(dataset = data_file, 
@@ -90,13 +91,12 @@ The replicates will be averaged during the pSILAC object generation. This design
 It is recommended to use cross-run normalized data if replication aggregation is intended. 
 
 ```{r generate pSILAC object with replicates, eval = FALSE}
-design_table_customized_replicates <- "i:/_R/pSILAC_LiuLab/KdeggeR/data/example_design_table_pSILAC_SN19_A2780Cis_Nor_replicate_design.txt"
+design_table_customized_replicates <- paste(.libPaths()[1], "KdeggeR/data/example_design_table_pSILAC_SN19_A2780Cis_Nor_replicate_design.txt", sep = "/")
 
 o_agg <- KdeggeR::generatepSILACObject(dataset = data_file, 
                                        design = design_table_customized_replicates, 
                                        inputDataType = "spectronaut", 
                                        aggregate.replicates = "median")
-
 ```
 
 # Filter data

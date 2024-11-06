@@ -11,6 +11,7 @@
 #' Must be 0 or 1. Default is 1.
 #' @importFrom dplyr filter select full_join
 #' @importFrom purrr reduce
+#' @importFrom tibble rownames_to_column
 #' @return A modified `pSILAC` object with filtered data. The `hol` and `ria` data frames are updated by removing rows 
 #' (based on specific criteria in the linear regression results), and an additional `test.outliers.hol` list contains 
 #' the regression model fits for each sample.
