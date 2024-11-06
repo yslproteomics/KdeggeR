@@ -44,12 +44,13 @@ generateDesignTemplate <- function(dataset, inputDataType = "spectronaut"){
     
     write.table(
       design, 
-      file = "design_table_template.xls",       
+      file = "design_table_template.tsv",       
       sep = "\t",                      
       row.names = FALSE,                
       quote = FALSE                    
     )
     
+    message(paste(Sys.time(), "The design template has been generated and save in the working folder.", sep = " "))
   }
   
 }
