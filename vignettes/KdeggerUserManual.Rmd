@@ -66,10 +66,10 @@ library(KdeggeR)
   - If the data has been pre-loaded in the R environment, the data must have row names corresponding to precursor ids.
   - See examples in the code chunks below. 
 
-### Spectronaut data, labeled workflow (recommended)
-  - Required columns: PG.ProteinGroups, EG.PrecursorId
-  - Light intensities: columns ending with "EG.Channel1Quantity"
-  - Heavy intensities: columns ending with "EG.Channel2Quantity"
+### Spectronaut data, labeled workflow
+  - Required columns: `PG.ProteinGroups`, `EG.PrecursorId`
+  - Light intensities: columns ending with `EG.Channel1Quantity`
+  - Heavy intensities: columns ending with `EG.Channel2Quantity`
   - Example data are provided, see `KdeggeR::example_spectronaut` to check the expected data structure
   
 ```{r example data lbl}
@@ -78,10 +78,10 @@ KdeggeR::example_spectronaut %>%
 ```
  
 ### Spectronaut data, ISW workflow 
-  - In SN19, the same columns can be used
+  - In SN19, the same columns can be exported and use
   - In older SN versions: 
-    - The light channel quantities are contained in the "EG.ReferenceQuantity"
-    - The heavy channel quantities in the "EG.TargetQuantity"
+    - The light channel quantities are named as `EG.ReferenceQuantity`
+    - The heavy channel quantities are named `EG.TargetQuantity`
     - In this case, rename the columns, so they match to the expected format, e.g., using the code in the chunk below. 
 
 ```{r example data isw, eval = FALSE}
@@ -90,18 +90,34 @@ KdeggeR::example_spectronaut_isw %>%
   dplyr::rename_with(~gsub("EG.ReferenceQuantity", "EG.Channel1Quantity", .), .cols = dplyr::ends_with("EG.ReferenceQuantity"))
 ```
 
+### DIA-NN and Fragpipe data, plexDIA
+  - Recommended output: 
+  - Required columns: `Protein.Group`, `Precursor.Id`
+  - Light intensities: columns ending with `.L`
+  - Heavy intensities: columns ending with `.H`
+  - Example data are provided, see `KdeggeR::example_diann` to check the expected data structure
+
+```{r example data dia_nn, eval = FALSE}
+KdeggeR::example_diann %>%
+  dplyr::glimpse()
+```
+
 ## Design table
   - The design can be either provided as a path to the file or can be a data.frame already loaded in the R environment.
   - If the data has been pre-loaded in the R environment, the table must have row names corresponding to raw file names.
-  - The table must have a **sample** column and **time** column (numeric, in hours). 
+  - Mandatory columns: 
+    1. sample
+    2. time (numeric, in hours)
   
-  - Optionally, **replicates** (numeric) can be specified for a replicate design analysis.
-  - Note, if there are replicates to be averaged, they should have the same value in the column **sample** of the design table. 
-  - Optionally, the **color** column can be specified to customize data plotting in post-analysis. 
-  - Optionally, the **condition** column can be specified. 
+  - Optionall columns: 
+    1. replicates (numeric) - needed replicate design analysis. Note replicates of the same sample should have the same value in the column sample of the design table if replicate design is used. See examples.  
+    2. color - customize data plotting in post-analysis. 
+    3. condition  
 
 ### Design table without replicate design
-  - If there are **no replicates** or there are supposed to be analyzed separately, the **sample** column needs to be provided accordingly. 
+  - If there are no replicates to be averaged before data processing.
+  - Unique sample names must be specified in the `sample` column
+  - The labeling time point must be specified in the `time` column
 
 ```{r example design lbl}
 # Examine the data structure
@@ -113,9 +129,11 @@ row.names(KdeggeR::example_spectronaut_design)
 ```
 
 ### Design table with replicate design
-  - If there are replicates that needs to be combined before analysis, the **sample** column needs to be provided accordingly to group the samples. 
-  - The **replicate** column must contain information about the replicates (numeric). 
-  - Note, if replicate design is used, the data will be combined in the beginning of the processing, and all subsequent steps are performed with the averaged data (such as RIA calculation, data filtering, kloss modeling, etc..). 
+  - If there are replicates that needs to be combined before analysis, the `sample` column needs to be specified accordingly to group the replicates 
+  - The `replicate` column must contain information about the replicates (numeric).
+  - The labeling time point must be specified in the `time` column
+
+Note, if replicate design is used, the data will be combined in the beginning of the processing, and all subsequent steps are performed with the averaged data (such as RIA calculation, data filtering, kloss modeling, etc..). 
 
 ```{r example design lbl replicates}
 # Examine the data structure

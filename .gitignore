@@ -5,9 +5,9 @@
 *.Rproj
 /.Rproj.user
 .Rbuildignore
-/data-raw/example_data_pSILAC_SN19_A2780Cis_Nor_full.tsv
-/data-raw/load_data.R
-/data-raw/__test_code_KdeggeR.Rmd
+/data-raw/
+/data-raw/
+/data-raw/
 inst/doc
 /doc/
 /Meta/
