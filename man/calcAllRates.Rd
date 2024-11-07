@@ -19,13 +19,13 @@ calcAllRates(
 \item{o}{A `pSILAC` object containing the data on which k_loss calculations will be performed.}
 
 \item{method}{A character string specifying the method used for calculating protein-level k_loss rates. 
-Default is `"combined"`. For more options and details, see the documentation for `calcProteinsKloss`.}
+Default is `combined`. For more options and details, see the documentation for `calcProteinsKloss`.}
 
 \item{ag.metric}{A character string specifying the aggregation metric used for calculating protein-level rates.
-Default is `"mean"`. Additional options can be found in `calcProteinsKloss`.}
+Default is `mean`. Additional options can be found in `calcProteinsKloss`.}
 
-\item{ag.weights}{A character string defining the method for calculating weights in aggregation (default is `"variance"`). 
-This parameter is ignored if `ag.metric` is not set to `"mean"`. Refer to `calcProteinsKloss` for details.}
+\item{ag.weights}{A character string defining the method for calculating weights in aggregation (default is `variance`). 
+This parameter is ignored if `ag.metric` is not set to `mean`. Refer to `calcProteinsKloss` for details.}
 
 \item{in.all}{Logical or numeric indicating whether to use only peptides quantified in all samples.
 For more information, refer to `calcProteinsKloss`.}
@@ -34,7 +34,7 @@ For more information, refer to `calcProteinsKloss`.}
 
 \item{tryRobust}{Logical, indicating if a robust fitting method should be used when applicable. Default is `FALSE`.}
 
-\item{startIntensity}{Character string, specifying the initial intensity value used in calculations. Default is `"max"`.}
+\item{startIntensity}{Character string, specifying the initial intensity value used in calculations. Default is `max`.}
 }
 \value{
 The function returns the updated `pSILAC` object with added k_loss estimates for both peptides and proteins.
