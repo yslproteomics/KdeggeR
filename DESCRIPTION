@@ -12,12 +12,12 @@ RoxygenNote: 7.3.2
 Imports:
     dplyr,
     purrr,
-    knitr
-Suggests: 
-    rmarkdown, 
-    rmdformats, 
-    MASS, 
+    knitr,
     magrittr
+Suggests: 
+    rmarkdown,
+    rmdformats,
+    MASS
 VignetteBuilder: knitr
 Depends: 
     R (>= 2.10)

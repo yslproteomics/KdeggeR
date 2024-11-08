@@ -250,7 +250,11 @@ protein_kloss_table <- calcProteinsKloss(pSILAC_object, method = "complement",
 
 ## Import experimentally-determined kcd values
 
-## Estimate kperc
+```{r example kcd}
+KdeggeR::example_kcd %>%
+  glimpse()
+```
+
 
 ## Calculate kdeg
 
