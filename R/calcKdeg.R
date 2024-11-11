@@ -36,7 +36,7 @@ calcKdeg <- function(o, rate_df = NULL, type = "kperc", perc_neg = 0.01) {
     stop("Protein kloss must be calculated first.")
   
   prot_kloss <- o$protein.kloss %>%
-    dplyr::select(dplyr::ends_with(".kloss"))
+    dplyr::select(-dplyr::ends_with(".stderr"), -dplyr::any_of("source"))
   
   names_kloss <- prot_kloss %>%
     colnames() %>%
@@ -55,7 +55,8 @@ calcKdeg <- function(o, rate_df = NULL, type = "kperc", perc_neg = 0.01) {
     
   } else if(type == "kcd"){  
     
-    stopifnot(!is.null(rate_df), "Please provide a data frame with kcd values.")
+    if(is.null(rate_df))
+      stop("Please provide a data frame with kcd values.")
     
     if(nrow(rate_df) != length(unique(o$design$sample)))  
       stop("Rates must be provided for every sample.")
@@ -64,8 +65,8 @@ calcKdeg <- function(o, rate_df = NULL, type = "kperc", perc_neg = 0.01) {
       stop("Sample names in rate_df do not match the expected samples.")
     
     kcd <- rate_df %>%
-      dplyr::filter(sample %in% names_kloss) %>%
-      dplyr::slice(match(names_kloss, sample)) %>%
+      dplyr::filter(sample %in% names_kloss) %>% 
+      dplyr::slice(match(names_kloss, sample)) %>% 
       dplyr::pull(kcd)
     
     message(paste(Sys.time(), "Using the provided kcd values to estimate kdeg..."))
@@ -76,5 +77,6 @@ calcKdeg <- function(o, rate_df = NULL, type = "kperc", perc_neg = 0.01) {
   }
   
   o$protein.kdeg <- prot_kdeg
+  
   return(o)
 }
