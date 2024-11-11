@@ -146,26 +146,24 @@ row.names(KdeggeR::example_spectronaut_design_replicates)
 
 ### Generate design table based on the results file
 
-  - The "generate_design_template()" function can be used to generate a customizable design table template based on the data file. 
+  - The `generate_design_template()` function can be used to generate a customizable design table template based on the data file. 
   - In this case, a path to the data file must be provided - example tsv files are provided in the data directory. 
   - A tsv file is exported, which can be customized by the user, saved as a .tsv file and used as an input for the `generatepSILACObject()` function.
   
 ```{r generate design table, eval = FALSE}
-# use libpath here
-data_file <- paste(.libPaths()[1], "KdeggeR/data/example_data_pSILAC_SN19_A2780Cis_Nor_full_truncated.tsv", sep = "/")
+# use path to the file
+input_data <- paste(.libPaths()[1], "KdeggeR/data/example_data_pSILAC_SN19.tsv", sep = "/")
 
-# See ?generateDesignTemplate
-KdeggeR::generateDesignTemplate(dataset = data_file, inputDataType = "spectronaut")
+KdeggeR::generateDesignTemplate(dataset = input_data, inputDataType = "spectronaut")
 ```
 
 ## kcd table
 
   - A simple kcd table with two columns can be provided to be used for kdeg calculation. 
-  - The table must contain a "sample" column identical to the "sample" column in the design table, and 
-  - a "kcd" column containing experimentally-derived cell doubling rates
+  - The table must contain a `sample` column identical to the `sample` column in the design table, and a `kcd` column containing experimentally-derived cell doubling rates. 
+  - See an example table below. 
   
 ```{r load kcd table}
-# See the example kcd table
 KdeggeR::example_kcd %>%
   glimpse()
 ```
@@ -174,29 +172,70 @@ KdeggeR::example_kcd %>%
 
 ## Function description
 
-The pSILAC object is generated using the design table and the data using the `generatepSILACobject()' function. The function prepares the R object, filters and/or averages the intensity data, and calculates the RIA(Light), ln(H/L + 1), and NLI values, which are then used for downstream processing.  
+The pSILAC object is generated using the design table and the data using the `generatepSILACobject()` function. The function prepares the R object, filters and/or averages the intensity data, and calculates the RIA(Light), ln(H/L + 1), and NLI values, which are then used for downstream processing.  
 
-The input data can be either loaded on R environment or provided as a path to the file. The 'inputDataType' parameter must be correctly specified as 'spectronaut', 'diann', 'fragpipe', 'maxquant', or 'openswath'. 
+The input data can be either loaded on R environment or provided as a path to the file. The `inputDataType` parameter must be correctly specified as `spectronaut`, `diann`, `fragpipe`, `maxquant`, or `openswath`. 
 
-For no replicate averaging, please set the 'aggregate.replicates' parameter to 'NA'. In this workflow, all unique conditions defined using the sample column in the design table will be processed independently. For replicate averaging, set the 'aggregate.replicates' parameter to either 'mean' or 'median' and provide a design table with the replicate indicated (as described above). When the replicate design is activated, the light and heavy intensities will be averaged using the selected method before any downstream filtering and analysis. 
+For no replicate averaging, please set the `aggregate.replicates` parameter to `NA`. In this workflow, all unique conditions defined using the sample column in the design table will be processed independently. For replicate averaging, set the `aggregate.replicates` parameter to either `mean` or `median` and provide a design table with the replicate indicated (as described above). When the replicate design is activated, the light and heavy intensities will be averaged using the selected method before any downstream filtering and analysis. 
 
-Specify the number of cores that will be used for the analysis using the paramater 'ncores'. By default set to 1, if NULL, the number of cores will be determined as 'detectCores() - 1'. 
+Specify the number of cores that will be used for the analysis using the paramater `ncores`. By default set to 1, if NULL, the number of cores will be determined as `detectCores() - 1`. 
 
-The 'filterPeptides' parameter will remove peptides with no lysine or arginine residues and can be used by default in a classic pSILAC experiment using stable isotopes of both lysine and arginine. 
+The `filterPeptides` parameter will remove peptides with no lysine or arginine residues and can be used by default in a classic pSILAC experiment using stable isotopes of both lysine and arginine. 
 
 Specify the intensity cutoff to remove low intensity signal. For the example dataset (i.e., analyzed with Spectronaut 19 and acquired using an Orbitrap Fusion Lumos platform) we recommed to use a cutoff of 8. This filtering can be performed in the quantification step in Spectronaut (from 19.3 onwards). Note, removing these extremely low values leads to a dramatic improvement of H/L ratio quantification in early time points of a pSILAC experiment. 
 
-The 'requant' and 'inpute.method' parameters are only relevant when working with OpenSwath results in long format. 
+The `requant` and `inpute.method` parameters are only relevant when working with OpenSwath results in long format. 
+
+See `?generatepSILACObject` for a full documentation. 
 
 ## Examples
 
-### Spectronaut example data without replicate design
+### Spectronaut 19 example without replicate design
 
-```{r generate pSILAC object Spectronaut in R, eval = TRUE}
+  - Use example data provided in the KdeggeR package. 
+
+```{r generate pSILAC object Spectronaut in R without replicates, eval = TRUE}
 input_data <- KdeggeR::example_spectronaut
 input_design <- KdeggeR::example_spectronaut_design
 
-# See ?generatepSILACObject
+pSILAC_object <- KdeggeR::generatepSILACObject(dataset = input_data, 
+                                   design = input_design, 
+                                   inputDataType = "spectronaut",
+                                   aggregate.replicates = NA, # if NA, replicates are not aggregated
+                                   filterPeptides = T, 
+                                   ncores = NULL,
+                                   noiseCutoff = 8)
+```
+
+### Spectronaut 19 example with replicate aggregation
+
+  - Use example data provided in the KdeggeR package. 
+  - The replicates will be averaged during the pSILAC object generation. 
+  - This design is advisable when processing experiments with, e.g., replicate injections or dish replicates. 
+
+```{r generate pSILAC object Spectronaut in R with replicates, eval = TRUE}
+input_data <- KdeggeR::example_spectronaut
+input_design <- KdeggeR::example_spectronaut_design_replicates
+
+pSILAC_object <- KdeggeR::generatepSILACObject(dataset = input_data, 
+                                   design = input_design, 
+                                   inputDataType = "spectronaut",
+                                   aggregate.replicates = "mean", # can be "mean" or "median"
+                                   filterPeptides = T, 
+                                   ncores = NULL,
+                                   noiseCutoff = 8)
+```
+
+### Spectronaut 19 example, use filepath
+
+  - The files are provided in the data directory. 
+  - The function will load the files using the provided paths and process the data. 
+
+```{r generate pSILAC object using file path, eval = FALSE}
+# design without replicates
+input_data <- paste(.libPaths()[1], "KdeggeR/data/example_data_pSILAC_SN19.tsv", sep = "/")
+input_design <- paste(.libPaths()[1], "KdeggeR/data/example_design_table_pSILAC_SN19_no_replicates.txt", sep = "/")
+
 pSILAC_object <- KdeggeR::generatepSILACObject(dataset = input_data, 
                                    design = input_design, 
                                    inputDataType = "spectronaut", # inputDataType needs to be correctly specified
@@ -204,33 +243,17 @@ pSILAC_object <- KdeggeR::generatepSILACObject(dataset = input_data,
                                    filterPeptides = T, 
                                    ncores = NULL,
                                    noiseCutoff = 8)
-```
 
+# design with replicates
+input_design <- paste(.libPaths()[1], "KdeggeR/data/example_design_table_pSILAC_SN19_replicates.txt", sep = "/")
 
-```{r generate pSILAC object, eval = FALSE}
-design_table_customized <- paste(.libPaths()[1], "KdeggeR/data/example_design_table_pSILAC_SN19_A2780Cis_Nor.txt", sep = "/")
-
-# See ?generatepSILACObject
-pSILAC_object <- KdeggeR::generatepSILACObject(dataset = data_file, 
-                                   design = design_table_customized, 
+pSILAC_object <- KdeggeR::generatepSILACObject(dataset = input_data, 
+                                   design = input_design, 
                                    inputDataType = "spectronaut", # inputDataType needs to be correctly specified
-                                   aggregate.replicates = NA, # if NA, replicates are not aggregated
+                                   aggregate.replicates = "mean", # can be "mean" or "median" 
                                    filterPeptides = T, 
-                                   ncores = 1,
+                                   ncores = NULL,
                                    noiseCutoff = 8)
-```
-
-## Generate pSILAC object with replicate design
-
-The replicates will be averaged during the pSILAC object generation. This design is advisable when processing experiments with, e.g., replicate injections or dish replicates which are not meant to be analyzed separately.
-
-```{r generate pSILAC object with replicates, eval = FALSE}
-design_table_customized_replicates <- paste(.libPaths()[1], "KdeggeR/data/example_design_table_pSILAC_SN19_A2780Cis_Nor_replicate_design.txt", sep = "/")
-
-pSILAC_object_agg <- KdeggeR::generatepSILACObject(dataset = data_file, 
-                                       design = design_table_customized_replicates, 
-                                       inputDataType = "spectronaut", 
-                                       aggregate.replicates = "median")
 ```
 
 # Filter data
