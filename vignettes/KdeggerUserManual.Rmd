@@ -152,7 +152,7 @@ row.names(KdeggeR::example_spectronaut_design_replicates)
   
 ```{r generate design table, eval = FALSE}
 # use path to the file
-input_data <- paste(.libPaths()[1], "KdeggeR/data/example_data_pSILAC_SN19.tsv", sep = "/")
+input_data <- paste(.libPaths()[1], "KdeggeR/data_tsv/example_data_pSILAC_SN19.tsv", sep = "/")
 
 KdeggeR::generateDesignTemplate(dataset = input_data, inputDataType = "spectronaut")
 ```
@@ -234,13 +234,13 @@ pSILAC_object$design
 
 ### Spectronaut 19 example, use filepath
 
-  - The files are provided in the data directory. 
+  - The files are provided in the data_tsv directory via the GitHub repository. 
   - The function will load the files using the provided paths and process the data. 
 
 ```{r generate pSILAC object using file path, eval = FALSE}
 # design without replicates
-input_data <- paste(.libPaths()[1], "KdeggeR/data/example_data_pSILAC_SN19.tsv", sep = "/")
-input_design <- paste(.libPaths()[1], "KdeggeR/data/example_design_table_pSILAC_SN19_no_replicates.txt", sep = "/")
+input_data <- paste(.libPaths()[1], "KdeggeR/data_tsv/example_data_pSILAC_SN19.tsv", sep = "/")
+input_design <- paste(.libPaths()[1], "KdeggeR/data_tsv/example_design_table_pSILAC_SN19_no_replicates.txt", sep = "/")
 
 pSILAC_object <- KdeggeR::generatepSILACObject(dataset = input_data, 
                                    design = input_design, 
@@ -251,7 +251,7 @@ pSILAC_object <- KdeggeR::generatepSILACObject(dataset = input_data,
                                    noiseCutoff = 8)
 
 # design with replicates
-input_design <- paste(.libPaths()[1], "KdeggeR/data/example_design_table_pSILAC_SN19_replicates.txt", sep = "/")
+input_design <- paste(.libPaths()[1], "KdeggeR/data_tsv/example_design_table_pSILAC_SN19_replicates.txt", sep = "/")
 
 pSILAC_object <- KdeggeR::generatepSILACObject(dataset = input_data, 
                                    design = input_design, 
@@ -343,6 +343,19 @@ If the data are already filtered, the `startIntensity` of `max` can be used for 
 pSILAC_object <- KdeggeR::calcNLIkloss(pSILAC_object, startIntensity = "max", ncores = NULL)
 ```
 
+## The H/L method
+
+The heavy proteins are synthesized over time, leading to an increasing H/L ratio. This process is exponential because the heavy proteins are gradually replacing the unlabeled (light). The H/L ratios are linearized by log-transformation and the rate of incorporation of the heavy label is then estimated from a linear model. 
+
+ln⁡(H/L+1)= k_syn  .t 
+
+In the steady-state condition, the rates of protein synthesis and degradation reach equilibrium. This means that the rate at which new heavy-labeled proteins are synthesized must be balanced by the rate at which proteins are degraded or turned over (kloss).
+
+```{r fit precursor NLI k_loss, eval = TRUE}
+pSILAC_object <- calcHoLkloss(pSILAC_object, tryRobust = FALSE, ncores = NULL)
+```
+
+
 ## Calculate all rates
 
 The `calcAllRates()` function is a wrapper function that runs precursor k_loss calculation using the RIA, ln(H/L +1), and NLI data. 
@@ -362,7 +375,7 @@ The model fitting functions can be also run separately using the following funct
 ```{r fit selected rates, eval = FALSE}
 # Precursor-level kloss
 
-pSILAC_object <- calcHoLkloss(pSILAC_object, tryRobust = FALSE, ncores = 1)
+
 
 # Aggregate to protein-level kloss
 pSILAC_object <- calcProteinsKloss(pSILAC_object, method = "complement", 
