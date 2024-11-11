@@ -447,3 +447,5 @@ pSILAC_object <- KdeggeR::calcHalflife(pSILAC_object)
 ### Plot protein model
 
 ### Plot protein summary
+
+# Statistical analysis
