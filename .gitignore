@@ -6,8 +6,6 @@
 /.Rproj.user
 .Rbuildignore
 /data-raw/
-/data-raw/
-/data-raw/
 inst/doc
 /doc/
 /Meta/
