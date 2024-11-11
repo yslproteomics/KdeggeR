@@ -4,7 +4,7 @@
 
 The KdeggeR package is designed to perform peptide and protein turnover rates estimation from dynamic SILAC labeling (pulse-SILAC, or pSILAC) proteomic experiments analyzed using multiplex DIA-MS. The package is optimized to handle DIA-MS data processed using commong raw MS data processing tools such as Spectronaut, DIA-NN, or Fragpipe, but can handle data measured using DDA-MS and analyzed with software tools like MaxQuant. The package offers optimized input data filtering, several kloss estimation methods for precursor/peptide level data, and functions for protein kloss and kdeg aggregation. The curve fits can be also inspected and exported using provided functions.
 
-See the "Kdegger_Manual.html" file for details and example analysis.
+See the vignette for detailed instructions and example code.
 
 See the preprint for a more detailed description of the package's functions and applications: doi: https://doi.org/10.1101/2024.10.28.620709
 
@@ -25,7 +25,13 @@ To install the package.
 
 ```{r}
 library("devtools")
-install_github("yslproteomics/KdeggeR")
+install_github("yslproteomics/KdeggeR", buildvignette = TRUE)
+```
+
+To open the vignette with detailed instructions and example code. 
+
+```{r}
+vignette("KdeggerUserManual", package = "KdeggeR")
 ```
 
 ## How to Cite
