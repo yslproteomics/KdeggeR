@@ -416,13 +416,21 @@ input_kcd <- KdeggeR::example_kcd %>%
 
 ## Calculate kdeg using kcd
 
-```{r calculate k_deg, eval = TRUE}
+```{r calculate k_deg using kcd, eval = TRUE}
 pSILAC_object <- KdeggeR::calcKdeg(pSILAC_object, rate_df = input_kcd, type = "kcd")
 ```
 
 ## Calculate kdeg using kperc
 
+```{r calculate k_deg using kperc, eval = TRUE}
+pSILAC_object <- KdeggeR::calcKdeg(pSILAC_object, rate_df = NULL, type = "kperc", perc_neg = 0.01)
+```
+
 ## Calculate t(1/2)
+
+```{r calculate protein halflife, eval = TRUE}
+pSILAC_object <- KdeggeR::calcHalflife(pSILAC_object)
+```
 
 # Visulize Results
 
