@@ -2,7 +2,7 @@
 title: "KdeggeR user manual"
 author: "Barbora Salovska"
 date: "Last edited `r format(Sys.Date(), '%A %d %B %Y')`"
-output:
+output: 
   rmdformats::readthedown:
     code_folding: show
     self_contained: true
@@ -12,7 +12,7 @@ output:
     toc_depth: 3
     toc_float: yes
 pkgdown:
-  as_is: true    
+  as_is: true
 vignette: >
   %\VignetteIndexEntry{KdeggerUserManual}
   %\VignetteEngine{knitr::rmarkdown}
