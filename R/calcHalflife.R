@@ -6,7 +6,7 @@
 #' @param o A pSILAC object containing protein degradation data. The object must include `protein.kdeg` values, 
 #' which are required for halflife calculation. If these values are not available, run `calcKdeg()` first.
 #' 
-#' @return The modified pSILAC object with an added `prot.halflife` matrix, representing the calculated protein halflives.
+#' @return The modified pSILAC object with an added `protein.halflife` matrix, representing the calculated protein halflives.
 #' 
 #' @export
 calcHalflife <- function(o) {
@@ -19,6 +19,6 @@ calcHalflife <- function(o) {
   prot_kdeg <- o$protein.kdeg
   prot_halflife <- log(2) / prot_kdeg
   
-  o$prot.halflife <- prot_halflife
+  o$protein.halflife <- prot_halflife
   return(o)
 }
