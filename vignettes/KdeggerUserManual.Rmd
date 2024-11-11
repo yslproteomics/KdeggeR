@@ -205,6 +205,9 @@ pSILAC_object <- KdeggeR::generatepSILACObject(dataset = input_data,
                                    filterPeptides = T, 
                                    ncores = NULL,
                                    noiseCutoff = 8)
+
+pSILAC_object$info
+pSILAC_object$design
 ```
 
 ### Spectronaut 19 example with replicate aggregation
@@ -224,6 +227,9 @@ pSILAC_object <- KdeggeR::generatepSILACObject(dataset = input_data,
                                    filterPeptides = T, 
                                    ncores = NULL,
                                    noiseCutoff = 8)
+
+pSILAC_object$info
+pSILAC_object$design
 ```
 
 ### Spectronaut 19 example, use filepath
@@ -258,11 +264,50 @@ pSILAC_object <- KdeggeR::generatepSILACObject(dataset = input_data,
 
 # Filter data
 
-```{r filter input data, eval = FALSE}
-pSILAC_object <- filterValidValues(pSILAC_object, values_cutoff = 2, skip_time_point = 1)
-pSILAC_object <- filterMonotone(pSILAC_object, skip_time_point = 1)
-pSILAC_object <- filterMonotoneTimePoint1(pSILAC_object)
-pSILAC_object <- filterLinearRegression(pSILAC_object, skip_time_point = 1, R2_cutoff = 0.9, p_cutoff = 0.05)
+We recommend to apply several data filtering steps before model fitting. These filtering steps are optional for the downstream analysis, but improve the results of the modeling using both non-linear least squares (NLS) fitting and linear modeling (lm) of the precursor and protein turnover rates. In principle, the data do not need any filtering based on valid values, since the model can still estimate rates using a single data point. However, in a dataset with a low level of missing values, these lower potentially quality fits can be removed. 
+
+We first filter data based on valid values and then based on the correct trend, following the assumption that the H/L ratios should be increasing over the time points in a steady-state pSILAC experiment. 
+
+These can be wither performed for the whole time-series or skipping the first time point if very short and expected to be noisy. For example, in a 4-5 time point experiment (such as 1, 4, 8, 12, and 24 hours), we would request at least two valid values in the later time points skipping the first, noisy data point, filter the remaining precursors based on correct trend, and then focus on keeping only high quality data in the first, 1 hour time point. 
+
+To do so, we replace by NA all values in time point 1, which do not follow the expected trend in this time point, and which were detected as significant outlier from a fit predicted by linear regression of the ln(H/L + 1) data. 
+
+## Filter based on valid values
+
+  - filter based on valid values, skip the first time point (preferable)
+  
+```{r filter valid values skip time point 1, eval = TRUE}
+pSILAC_object <- KdeggeR::filterValidValues(pSILAC_object, values_cutoff = 2, skip_time_point = 1)
+```
+
+  - filter based on valid values, at least 3 values requested in a time-series
+  
+```{r filter valid values, eval = TRUE}
+# example code, does not modify the pSILAC object
+KdeggeR::filterValidValues(pSILAC_object, values_cutoff = 3, skip_time_point = 0)
+```
+
+## Filter based on monotone trend
+
+  - Removes precursors which do not follow the expected trend, skipping time point 1
+  - Replaces values in time point 1, which do not follow the expected trend considering the next time point available
+
+```{r filter monotone trend, eval = TRUE}
+pSILAC_object <- KdeggeR::filterMonotone(pSILAC_object, skip_time_point = 1)
+pSILAC_object <- KdeggeR::filterMonotoneTimePoint1(pSILAC_object)
+```
+
+  - Removes precursors which do not follow the expected trend, including time point 1
+
+```{r filter monotone trend, eval = TRUE}
+# example code, does not modify the pSILAC object
+KdeggeR::filterMonotone(pSILAC_object, skip_time_point = 0)
+```
+
+## Filter based on linear regression
+
+```{r filter linear regression, eval = TRUE}
+pSILAC_object <- KdeggeR::filterLinearRegression(pSILAC_object, skip_time_point = 1, R2_cutoff = 0.9, p_cutoff = 0.05)
 ```
 
 # Fit models to estimate Kloss
