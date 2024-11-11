@@ -17,32 +17,48 @@ generatepSILACObject(
 )
 }
 \arguments{
-\item{dataset}{A tab-separated file containing precursor-level data. Must contain quantification columns with light and heavy 
-precursor intensities, unique precursor id, and a protein id column. If the data are loaded in R environment,
-the dataset must be a data.frame with precursor ids used as row names.}
+\item{dataset}{A tab-separated file or `data.frame` in R containing precursor-level data.
 
-\item{design}{A tab-separated file, where the first column corresponds to the raw file name,
-it must have a "sample" column and a "time" column in numeric format (hours). 
-Optionally, replicates (numeric) can be specified for a replicate design analysis. If there are replicates to be averaged, they should have the same value in the column 'sample' of the design table.
-Color column can be specified to customize data plotting.
-Use the "generate_design_template()" function to generate a customizable design table template. 
-If the design table is loaded in R environment, the design must be a data.frame with raw file names used as row names.}
+If provided as a file, `dataset` must include:
+- Columns for light and heavy precursor intensities
+- A unique precursor ID column
+- A protein ID column
 
-\item{inputDataType}{can be "spectronaut", "diann", "fragpipe", "maxquant", or "openswath.}
+If provided as a `data.frame` in R, `dataset` must:
+- Use precursor IDs as row names
+- Include columns for light and heavy intensities}
 
-\item{requant}{this parameter is only relevant for OpenSwath results. 
-Indicates whether to 'keep', 'remove' or 'impute' the requantified values with a score greater than 0.05 (default 'remove', or keep if ). 
-This requires that there are columns prepended with 'Intensity_' and 'score_' for each sample/timepoint in the 'dataset'.}
+\item{design}{A tab-separated file or `data.frame` in R defining the experimental design.
 
-\item{aggregate.replicates}{function with which to aggregate replicates ('median' or 'mean'; median recommended), 
-or NA if replicates are absent or should not be aggregated.
-If there are replicates, they should have the same value in the column 'sample' of the design table.}
+- **File format**: The first column must be the raw file name. The file should also contain:
+  - A `sample` column for sample identifiers
+  - A `time` column in numeric format (hours)
+  - Optional columns:
+    - `replicate` column (numeric), for replicate IDs if a replicate design analysis is desired
+    - `color` column to customize data plotting
+- For replicate samples to be averaged, they must have the same value in the `sample` column.
 
-\item{filterPeptides}{If TRUE, removes peptides without any K or R from the analysis (recommended)}
+- **Data.frame format**: If loaded as a `data.frame` in R, `design` must use raw file names as row names.
+- **Template**: Use `generate_design_template()` to create a customizable design table template.}
 
-\item{ncores}{the number of cores to use (defaults to 1)}
+\item{inputDataType}{A character string specifying the type of input data. Options include `spectronaut`, `diann`, `fragpipe`, `maxquant`, or `openswath`.}
 
-\item{noiseCutoff}{if not NULL, the cutoff will be applied to light and heavy intensities.}
+\item{requant}{Relevant for OpenSwath data only. Specifies handling of requantified values with a score greater than `0.05`.
+- Options:
+  - `keep`: Retain requantified values
+  - `remove`: Exclude requantified values (default)
+  - `impute`: Replace requantified values with imputed values
+- **Data requirements**: Assumes columns are prepended with `Intensity_` and `score_` for each sample/timepoint in `dataset`.}
+
+\item{aggregate.replicates}{Method for aggregating replicate values:
+- Options: `median` (recommended) or `mean`. Set to `NA` if no replicates are present or should not be aggregated.
+- For replicate averaging, all replicates should have the same value in the `sample` column of `design`.}
+
+\item{filterPeptides}{Logical; if `TRUE`, removes peptides without any lysine (K) or arginine (R) residues from the analysis (recommended).}
+
+\item{ncores}{Integer; the number of cores to use for parallel computation. Defaults to `1`.}
+
+\item{noiseCutoff}{Numeric; specifies a cutoff for light and heavy intensities. If `NULL`, no cutoff is applied.}
 }
 \value{
 a pSILAC object.
