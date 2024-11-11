@@ -274,13 +274,13 @@ To do so, we replace by NA all values in time point 1, which do not follow the e
 
 ## Filter based on valid values
 
-  - filter based on valid values, skip the first time point (preferable)
+  - Filter based on valid values, skip the first time point (preferable for the example dataset). 
   
 ```{r filter valid values skip time point 1, eval = TRUE}
 pSILAC_object <- KdeggeR::filterValidValues(pSILAC_object, values_cutoff = 2, skip_time_point = 1)
 ```
 
-  - filter based on valid values, at least 3 values requested in a time-series
+  - Filter based on valid values, at least 3 values requested in a time-series. 
   
 ```{r filter valid values, eval = TRUE}
 # example code, does not modify the pSILAC object
@@ -289,15 +289,15 @@ KdeggeR::filterValidValues(pSILAC_object, values_cutoff = 3, skip_time_point = 0
 
 ## Filter based on monotone trend
 
-  - Removes precursors which do not follow the expected trend, skipping time point 1
-  - Replaces values in time point 1, which do not follow the expected trend considering the next time point available
+  - Removes precursors which do not follow the expected trend, skipping time point 1 (preferable for the example dataset). 
+  - Replaces values in time point 1, which do not follow the expected trend considering the next time point available. 
 
-```{r filter monotone trend, eval = TRUE}
+```{r filter monotone trend skip time point 1, eval = TRUE}
 pSILAC_object <- KdeggeR::filterMonotone(pSILAC_object, skip_time_point = 1)
 pSILAC_object <- KdeggeR::filterMonotoneTimePoint1(pSILAC_object)
 ```
 
-  - Removes precursors which do not follow the expected trend, including time point 1
+  - Removes precursors which do not follow the expected trend, including time point 1. 
 
 ```{r filter monotone trend, eval = TRUE}
 # example code, does not modify the pSILAC object
@@ -306,17 +306,48 @@ KdeggeR::filterMonotone(pSILAC_object, skip_time_point = 0)
 
 ## Filter based on linear regression
 
+  - Applies linear regression to the ln(H/L + 1) data and Grubbs' test to detect outliers in the first time point.
+  - Time point 1 values with a Grubbs' test P value lower than a selected threshold (`p_cutoff`) and corresponding to curves with an R2 lower than selected threshold (`R2_cutoff`) will be replaced by NA in both ln(H/L + 1) data and RIA data. 
+  
 ```{r filter linear regression, eval = TRUE}
 pSILAC_object <- KdeggeR::filterLinearRegression(pSILAC_object, skip_time_point = 1, R2_cutoff = 0.9, p_cutoff = 0.05)
 ```
 
-# Fit models to estimate Kloss
+# Fit models to estimate k_loss
+
+## The RIA method
+
+At each time point, the amount of heavy (H) and light (L) precursor was extracted and used to calculate the relative isotopic abundance RIAt.
+  
+  - RIA_t=L/(L+H)
+  
+The value of RIAt changes over time as unlabeled proteins are gradually replaced by heavy-labeled proteins throughout the experiment. This occurs because of cell division, which dilutes the unlabeled proteins, and the natural turnover of intracellular proteins, where the loss rate can be described by an exponential decay process.
+  
+  - RIA_t=RIA_0 .e ^((-k_loss . t))
+
+Where RIA0 denotes the initial isotopic ratio and kloss the rate of loss of unlabeled protein. We assumed RIA0 = 1, as no heavy isotope was present at t = 0, thus the value of RIAt will decay exponentially from 1 to 0 after infinite time and used nonlinear least‐squares estimation to perform the fit. As discussed before, these assumptions may reduce measurement error, especially at the beginning of the experiment, where isotopic ratios are less accurate. 
+
+```{r fit precursor RIA k_loss, eval = TRUE}
+pSILAC_object <- KdeggeR::calcRIAkloss(pSILAC_object, ncores = NULL)
+```
+
+## The NLI method
+
+A simpler approach to determine de facto protein degradation rates is to directly calculate the rate of loss from the light peptide intensities. The light peptide intensities need to be normalized using median channel sums to calculate the normalized intensity values (NLI), which is done during the pSILAC object generation step. 
+
+Then, the light precursor rate of loss can be modeled using the same model and assumptions as in the case of the RIA-based modeling. As we reported previously, the NLI and RIA method results are strongly correlated, however, the NLI method tends to have higher variability. However, since the low-abundant heavy signals are not required, this method might provide more precursor-level k_loss and if desired, the results can be combined with or complement the RIA-based k_loss values during the protein level aggregation.
+
+If the data are already filtered, the `startIntensity` of `max` can be used for the modeling, as the intensity in the first measured time point is the maximum one. Other options are available and might be used for unfiltered data, such as `median` or  `model`, see the function documentation.  
+
+```{r fit precursor NLI k_loss, eval = TRUE}
+pSILAC_object <- KdeggeR::calcNLIkloss(pSILAC_object, startIntensity = "max", ncores = NULL)
+```
 
 ## Calculate all rates
 
-The `calcAllRates()` function is a wrapper function that runs precursor kloss calculation using the RIA, ln(H/L +1), and NLI data. 
+The `calcAllRates()` function is a wrapper function that runs precursor k_loss calculation using the RIA, ln(H/L +1), and NLI data. 
 
-Then it aggregates the precursor-level estimates into protein kloss estimates using the selected method.
+Then it aggregates the precursor-level estimates into protein k_loss estimates using the selected method.
 
 ```{r fit all rates, eval = FALSE}
 pSILAC_object <- calcAllRates(pSILAC_object, method = "complement", 
@@ -330,8 +361,7 @@ The model fitting functions can be also run separately using the following funct
 
 ```{r fit selected rates, eval = FALSE}
 # Precursor-level kloss
-pSILAC_object <- calcRIAkloss(pSILAC_object, ncores = 1)
-pSILAC_object <- calcNLIkloss(pSILAC_object, startIntensity = "max", ncores = 1)
+
 pSILAC_object <- calcHoLkloss(pSILAC_object, tryRobust = FALSE, ncores = 1)
 
 # Aggregate to protein-level kloss
