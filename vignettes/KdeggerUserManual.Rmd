@@ -108,11 +108,11 @@ KdeggeR::example_diann %>%
   - Mandatory columns: 
     1. sample
     2. time (numeric, in hours)
+    3. color (enables data plotting in post-analysis)
   
-  - Optionall columns: 
+  - Optional columns: 
     1. replicates (numeric) - needed replicate design analysis. Note replicates of the same sample should have the same value in the column sample of the design table if replicate design is used. See examples.  
-    2. color - customize data plotting in post-analysis. 
-    3. condition  
+    2. condition  
 
 ### Design table without replicate design
   - If there are no replicates to be averaged before data processing.
@@ -438,14 +438,36 @@ pSILAC_object <- KdeggeR::calcHalflife(pSILAC_object)
 
 ### Plot precursor RIA model
 
-### Plot precursor NLI model
+```{r}
+pSILAC_object$peptides %>%
+  dplyr::slice_head(n = 10) %>%
+  glimpse()
+
+KdeggeR::plotPeptideRIA(pSILAC_object, peptide = "_NFALLGVGTSK_.2")
+```
 
 ### Plot precursor ln(H/L +1) model
 
+```{r}
+KdeggeR::plotPeptideHoL(pSILAC_object, peptide = "_NFALLGVGTSK_.2")
+```
+
 ## Protein
 
-### Plot protein model
+### Plot protein RIA
+
+```{r}
+KdeggeR::plotProteinRIA(pSILAC_object, protein = "A0A0B4J2D5/P0DPI2")
+```
+
+### Plot protein HoL
+
+```{r}
+KdeggeR::plotProteinHol(pSILAC_object, protein = "A0A0B4J2D5/P0DPI2")
+```
 
 ### Plot protein summary
 
-# Statistical analysis
+```{r}
+KdeggeR::plotProtein(pSILAC_object, protein = "A0A0B4J2D5/P0DPI2")
+```
