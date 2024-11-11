@@ -347,46 +347,33 @@ pSILAC_object <- KdeggeR::calcNLIkloss(pSILAC_object, startIntensity = "max", nc
 
 The heavy proteins are synthesized over time, leading to an increasing H/L ratio. This process is exponential because the heavy proteins are gradually replacing the unlabeled (light). The H/L ratios are linearized by log-transformation and the rate of incorporation of the heavy label is then estimated from a linear model. 
 
-ln⁡(H/L+1)= k_syn  .t 
+  - ln⁡(H/L+1)= k_syn  .t 
 
 In the steady-state condition, the rates of protein synthesis and degradation reach equilibrium. This means that the rate at which new heavy-labeled proteins are synthesized must be balanced by the rate at which proteins are degraded or turned over (kloss).
 
-```{r fit precursor NLI k_loss, eval = TRUE}
+```{r fit precursor HOL k_loss, eval = TRUE}
 pSILAC_object <- calcHoLkloss(pSILAC_object, tryRobust = FALSE, ncores = NULL)
 ```
 
+# Calculate protein k_loss
 
-## Calculate all rates
+Protein-level kloss values can be calculated by different options including performing a weighted average of the selected fit (e.g., RIA only) or their combination/complement (e.g., RIA and NLI). The number of data points used to estimate precursor-level kloss, the variance of the fit, or both can be used as weights.
 
-The `calcAllRates()` function is a wrapper function that runs precursor k_loss calculation using the RIA, ln(H/L +1), and NLI data. 
+## Peform weighted average
 
-Then it aggregates the precursor-level estimates into protein k_loss estimates using the selected method.
-
-```{r fit all rates, eval = FALSE}
-pSILAC_object <- calcAllRates(pSILAC_object, method = "complement", 
-                  ag.metric = "mean", 
-                  ag.weights = "both")
-```
-
-## Calculate specific rates
-
-The model fitting functions can be also run separately using the following functions. 
-
-```{r fit selected rates, eval = FALSE}
-# Precursor-level kloss
-
-
-
-# Aggregate to protein-level kloss
+```{r calculate protein k_loss, eval = TRUE}
 pSILAC_object <- calcProteinsKloss(pSILAC_object, method = "complement", 
                        ag.metric = "mean", 
                        ag.weights = "both", 
                        ncores = 1, 
                        returnKlossTableOnly = F, 
                        returnSD = F )
+```
 
-# Aggregate to protein-level kloss, export protein-level kloss table in a new object
-protein_kloss_table <- calcProteinsKloss(pSILAC_object, method = "complement", 
+## Direct export of protein-level kloss as a data.frame
+
+```{r calculate protein k_loss and export table, eval = TRUE}
+prot_kloss <- calcProteinsKloss(pSILAC_object, method = "complement", 
                        ag.metric = "mean", 
                        ag.weights = "both", 
                        ncores = 1, 
@@ -394,7 +381,30 @@ protein_kloss_table <- calcProteinsKloss(pSILAC_object, method = "complement",
                        returnSD = F )
 ```
 
-# Calculate kdeg 
+# Calculate all rates
+
+The `calcAllRates()` function is a wrapper function that runs precursor k_loss calculation using the RIA, ln(H/L +1), and NLI data. 
+
+Then it aggregates the precursor-level estimates into protein k_loss estimates using the selected method. This function can be used 
+
+```{r fit all rates, eval = FALSE}
+pSILAC_object <- calcAllRates(pSILAC_object, method = "complement", 
+                  ag.metric = "mean", 
+                  ag.weights = "both")
+```
+
+# Calculate k_deg and t_1/2
+
+Protein degradation rates are estimated by subtracting the cell division rates (kcd) to correct for the protein pool dilution caused by the exponential cell division. 
+
+  - k_deg=k_loss-k_cd
+
+However, practically, the cell division rates tend to be very variable between different experiments and thus the precision and accuracy tend to be low. Therefore, we enabled the option to use a kcd derived from the distribution of the kloss values by assuming that most kdeg values should be positive after the correction. We suggest a value (kperc) by subtraction of which only 1% of kdeg values would be negative that the users may be able to estimate the kdeg values in cell culture derived datasets. 
+
+  - k_deg=k_loss-k_perc
+  
+Optionally, protein half-lives from the degradation rate constant using the following formula.
+  - t_(1/2) = (ln⁡(2))/k_deg 
 
 ## Import experimentally-determined kcd values
 
@@ -403,8 +413,9 @@ KdeggeR::example_kcd %>%
   glimpse()
 ```
 
+## Calculate kdeg using kcd
 
-## Calculate kdeg
+## Calculate kdeg using kperc
 
 ## Calculate t(1/2)
 
