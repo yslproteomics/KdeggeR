@@ -17,7 +17,8 @@ Imports:
 Suggests: 
     rmarkdown,
     rmdformats,
-    MASS
+    MASS, 
+    limma
 VignetteBuilder: knitr
 Depends: 
     R (>= 2.10)
