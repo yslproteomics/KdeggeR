@@ -1,25 +1,25 @@
 raw_file	condition	sample	time	replicate	color
-X.1..20181024_A2780_pSILAC_Cis_1h_1.raw	Cis	Cis	1	1	
-X.2..20181024_A2780_pSILAC_Cis_1h_2.raw	Cis	Cis	1	2	
-X.3..20181024_A2780_pSILAC_Cis_1h_3.raw	Cis	Cis	1	3	
-X.4..20181024_A2780_pSILAC_Cis_4h_1.raw	Cis	Cis	4	1	
-X.5..20181024_A2780_pSILAC_Cis_4h_2.raw	Cis	Cis	4	2	
-X.6..20181024_A2780_pSILAC_Cis_4h_3.raw	Cis	Cis	4	3	
-X.7..20181024_A2780_pSILAC_Cis_8h_1.raw	Cis	Cis	8	1	
-X.8..20181024_A2780_pSILAC_Cis_8h_2.raw	Cis	Cis	8	2	
-X.9..20181024_A2780_pSILAC_Cis_8h_3.raw	Cis	Cis	8	3	
-X.10..20181024_A2780_pSILAC_Cis_12h_1.raw	Cis	Cis	12	1	
-X.11..20181024_A2780_pSILAC_Cis_12h_2.raw	Cis	Cis	12	2	
-X.12..20181024_A2780_pSILAC_Cis_12h_3.raw	Cis	Cis	12	3	
-X.13..20181024_A2780_pSILAC_Nor_1h_1.raw	Nor	Nor	1	1	
-X.14..20181024_A2780_pSILAC_Nor_1h_2.raw	Nor	Nor	1	2	
-X.15..20181024_A2780_pSILAC_Nor_1h_3.raw	Nor	Nor	1	3	
-X.16..20181024_A2780_pSILAC_Nor_4h_1.raw	Nor	Nor	4	1	
-X.17..20181024_A2780_pSILAC_Nor_4h_2.raw	Nor	Nor	4	2	
-X.18..20181024_A2780_pSILAC_Nor_4h_3.raw	Nor	Nor	4	3	
-X.19..20181024_A2780_pSILAC_Nor_8h_1.raw	Nor	Nor	8	1	
-X.20..20181024_A2780_pSILAC_Nor_8h_2.raw	Nor	Nor	8	2	
-X.21..20181024_A2780_pSILAC_Nor_8h_3.raw	Nor	Nor	8	3	
-X.22..20181024_A2780_pSILAC_Nor_12h_1.raw	Nor	Nor	12	1	
-X.23..20181024_A2780_pSILAC_Nor_12h_2.raw	Nor	Nor	12	2	
-X.24..20181024_A2780_pSILAC_Nor_12h_3.raw	Nor	Nor	12	3	
+X.1..20181024_A2780_pSILAC_Cis_1h_1.raw	Cis	Cis	1	1	"red"
+X.2..20181024_A2780_pSILAC_Cis_1h_2.raw	Cis	Cis	1	2	"red"
+X.3..20181024_A2780_pSILAC_Cis_1h_3.raw	Cis	Cis	1	3	"red"
+X.4..20181024_A2780_pSILAC_Cis_4h_1.raw	Cis	Cis	4	1	"red"
+X.5..20181024_A2780_pSILAC_Cis_4h_2.raw	Cis	Cis	4	2	"red"
+X.6..20181024_A2780_pSILAC_Cis_4h_3.raw	Cis	Cis	4	3	"red"
+X.7..20181024_A2780_pSILAC_Cis_8h_1.raw	Cis	Cis	8	1	"red"
+X.8..20181024_A2780_pSILAC_Cis_8h_2.raw	Cis	Cis	8	2	"red"
+X.9..20181024_A2780_pSILAC_Cis_8h_3.raw	Cis	Cis	8	3	"red"
+X.10..20181024_A2780_pSILAC_Cis_12h_1.raw	Cis	Cis	12	1	"red"
+X.11..20181024_A2780_pSILAC_Cis_12h_2.raw	Cis	Cis	12	2	"red"
+X.12..20181024_A2780_pSILAC_Cis_12h_3.raw	Cis	Cis	12	3	"red"
+X.13..20181024_A2780_pSILAC_Nor_1h_1.raw	Nor	Nor	1	1	"blue"
+X.14..20181024_A2780_pSILAC_Nor_1h_2.raw	Nor	Nor	1	2	"blue"
+X.15..20181024_A2780_pSILAC_Nor_1h_3.raw	Nor	Nor	1	3	"blue"
+X.16..20181024_A2780_pSILAC_Nor_4h_1.raw	Nor	Nor	4	1	"blue"
+X.17..20181024_A2780_pSILAC_Nor_4h_2.raw	Nor	Nor	4	2	"blue"
+X.18..20181024_A2780_pSILAC_Nor_4h_3.raw	Nor	Nor	4	3	"blue"
+X.19..20181024_A2780_pSILAC_Nor_8h_1.raw	Nor	Nor	8	1	"blue"
+X.20..20181024_A2780_pSILAC_Nor_8h_2.raw	Nor	Nor	8	2	"blue"
+X.21..20181024_A2780_pSILAC_Nor_8h_3.raw	Nor	Nor	8	3	"blue"
+X.22..20181024_A2780_pSILAC_Nor_12h_1.raw	Nor	Nor	12	1	"blue"
+X.23..20181024_A2780_pSILAC_Nor_12h_2.raw	Nor	Nor	12	2	"blue"
+X.24..20181024_A2780_pSILAC_Nor_12h_3.raw	Nor	Nor	12	3	"blue"
