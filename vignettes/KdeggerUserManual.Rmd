@@ -35,7 +35,7 @@ library(magrittr)
 
 ```{r install dependencies, eval = FALSE}
 if(!require(pacman)) install.packages("pacman")
-pacman::p_load(devtools, dplyr, outliers, parallel, purrr, stats, stringr, tibble)
+pacman::p_load(devtools, dplyr, outliers, purrr, stringr, tibble)
 
 # Optional
 # install.packages("MASS")
@@ -468,6 +468,6 @@ KdeggeR::plotProteinHol(pSILAC_object, protein = "A0A0B4J2D5/P0DPI2")
 
 ### Plot protein summary
 
-```{r}
+```{r, fig.dim=c(10,10)}
 KdeggeR::plotProtein(pSILAC_object, protein = "A0A0B4J2D5/P0DPI2")
 ```
