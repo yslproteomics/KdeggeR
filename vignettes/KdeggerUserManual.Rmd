@@ -373,19 +373,19 @@ pSILAC_object <- calcProteinsKloss(pSILAC_object, method = "complement",
 ## Direct export of protein-level kloss as a data.frame
 
 ```{r calculate protein k_loss and export table, eval = TRUE}
-prot_kloss <- calcProteinsKloss(pSILAC_object, method = "complement", 
+prot_kloss <- calcProteinsKloss(pSILAC_object, method = "RIA", 
                        ag.metric = "mean", 
                        ag.weights = "both", 
                        ncores = 1, 
                        returnKlossTableOnly = T, 
-                       returnSD = F )
+                       returnSD = T )
 ```
 
 # Calculate all rates
 
-The `calcAllRates()` function is a wrapper function that runs precursor k_loss calculation using the RIA, ln(H/L +1), and NLI data. 
+The `calcAllRates()` function is a wrapper function that calc the individual functions above to perform precursor k_loss calculation using the RIA, ln(H/L +1), and NLI data. 
 
-Then it aggregates the precursor-level estimates into protein k_loss estimates using the selected method. This function can be used 
+Then it aggregates the precursor-level estimates into protein k_loss estimates using the selected method.
 
 ```{r fit all rates, eval = FALSE}
 pSILAC_object <- calcAllRates(pSILAC_object, method = "complement", 
@@ -409,11 +409,16 @@ Optionally, protein half-lives from the degradation rate constant using the foll
 ## Import experimentally-determined kcd values
 
 ```{r example kcd}
-KdeggeR::example_kcd %>%
-  glimpse()
+input_kcd <- KdeggeR::example_kcd %>%
+  dplyr::filter(sample %in% c("Cis_1", "Nor_1")) %>%
+  dplyr::mutate(sample = gsub("_1", "", sample))
 ```
 
 ## Calculate kdeg using kcd
+
+```{r calculate k_deg, eval = TRUE}
+pSILAC_object <- KdeggeR::calcKdeg(pSILAC_object, rate_df = input_kcd, type = "kcd")
+```
 
 ## Calculate kdeg using kperc
 
