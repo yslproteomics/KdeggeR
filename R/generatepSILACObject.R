@@ -266,7 +266,10 @@ generatepSILACObject <- function(dataset, design, inputDataType = "spectronaut",
     NLI = NULL,
     RIA.kloss = NULL,
     hol.kloss = NULL,
-    protein.kloss = NULL
+    NLI.kloss = NULL, 
+    protein.kloss = NULL, 
+    protein.kdeg = NULL,
+    protein.halflife = NULL
   )
   
   # Additional cleanup for standard data types
