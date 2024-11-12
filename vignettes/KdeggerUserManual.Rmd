@@ -34,18 +34,25 @@ library(magrittr)
 ## Install dependencies
 
 ```{r install dependencies, eval = FALSE}
+# Required packages
 if(!require(pacman)) install.packages("pacman")
-pacman::p_load(devtools, dplyr, outliers, purrr, stringr, tibble)
+pacman::p_load(dplyr, outliers, purrr, stringr, tibble)
 
-# Optional
-# install.packages("MASS")
+# Optional R package for robust linear model fitting
+install.packages("MASS")
 ```
 
 ## Install KdeggeR
 
 ```{r install KdeggeR, eval = FALSE}
 library("devtools")
-install_github("yslproteomics/KdeggeR")
+install_github("yslproteomics/KdeggeR", build_vignettes = TRUE)
+```
+
+## Open the vignette
+
+```{r install KdeggeR, eval = FALSE}
+vignette("KdeggerUserManual", package = "KdeggeR")
 ```
 
 ## Load KdeggeR
