@@ -50,7 +50,7 @@ install_github("yslproteomics/KdeggeR")
 
 ## Load KdeggeR
 
-```{r load KdeggeR}
+```{r load KdeggeR, eval = FALSE}
 library(KdeggeR)
 ```
 
@@ -72,7 +72,7 @@ library(KdeggeR)
   - Heavy intensities: columns ending with `EG.Channel2Quantity`
   - Example data are provided, see `KdeggeR::example_spectronaut` to check the expected data structure
   
-```{r example data lbl}
+```{r example data lbl, eval = FALSE}
 KdeggeR::example_spectronaut %>%
   dplyr::glimpse()
 ```
@@ -119,7 +119,7 @@ KdeggeR::example_diann %>%
   - Unique sample names must be specified in the `sample` column
   - The labeling time point must be specified in the `time` column
 
-```{r example design lbl}
+```{r example design lbl, eval = FALSE}
 # Examine the data structure
 KdeggeR::example_spectronaut_design %>%
   dplyr::glimpse()
@@ -135,7 +135,7 @@ row.names(KdeggeR::example_spectronaut_design)
 
 Note, if replicate design is used, the data will be combined in the beginning of the processing, and all subsequent steps are performed with the averaged data (such as RIA calculation, data filtering, kloss modeling, etc..). 
 
-```{r example design lbl replicates}
+```{r example design lbl replicates, eval = FALSE}
 # Examine the data structure
 KdeggeR::example_spectronaut_design_replicates %>%
   dplyr::glimpse()
@@ -163,7 +163,7 @@ KdeggeR::generateDesignTemplate(dataset = input_data, inputDataType = "spectrona
   - The table must contain a `sample` column identical to the `sample` column in the design table, and a `kcd` column containing experimentally-derived cell doubling rates. 
   - See an example table below. 
   
-```{r load kcd table}
+```{r load kcd table, eval = FALSE}
 KdeggeR::example_kcd %>%
   glimpse()
 ```
@@ -194,7 +194,7 @@ See `?generatepSILACObject` for a full documentation.
 
   - Use example data provided in the KdeggeR package. 
 
-```{r generate pSILAC object Spectronaut in R without replicates, eval = TRUE}
+```{r generate pSILAC object Spectronaut in R without replicates, eval = FALSE}
 input_data <- KdeggeR::example_spectronaut
 input_design <- KdeggeR::example_spectronaut_design
 
@@ -216,7 +216,7 @@ pSILAC_object$design
   - The replicates will be averaged during the pSILAC object generation. 
   - This design is advisable when processing experiments with, e.g., replicate injections or dish replicates. 
 
-```{r generate pSILAC object Spectronaut in R with replicates, eval = TRUE}
+```{r generate pSILAC object Spectronaut in R with replicates, eval = FALSE}
 input_data <- KdeggeR::example_spectronaut
 input_design <- KdeggeR::example_spectronaut_design_replicates
 
@@ -276,13 +276,13 @@ To do so, we replace by NA all values in time point 1, which do not follow the e
 
   - Filter based on valid values, skip the first time point (preferable for the example dataset). 
   
-```{r filter valid values skip time point 1, eval = TRUE}
+```{r filter valid values skip time point 1, eval = FALSE}
 pSILAC_object <- KdeggeR::filterValidValues(pSILAC_object, values_cutoff = 2, skip_time_point = 1)
 ```
 
   - Filter based on valid values, at least 3 values requested in a time-series. 
   
-```{r filter valid values, eval = TRUE}
+```{r filter valid values, eval = FALSE}
 # example code, does not modify the pSILAC object
 KdeggeR::filterValidValues(pSILAC_object, values_cutoff = 3, skip_time_point = 0)
 ```
@@ -292,14 +292,14 @@ KdeggeR::filterValidValues(pSILAC_object, values_cutoff = 3, skip_time_point = 0
   - Removes precursors which do not follow the expected trend, skipping time point 1 (preferable for the example dataset). 
   - Replaces values in time point 1, which do not follow the expected trend considering the next time point available. 
 
-```{r filter monotone trend skip time point 1, eval = TRUE}
+```{r filter monotone trend skip time point 1, eval = FALSE}
 pSILAC_object <- KdeggeR::filterMonotone(pSILAC_object, skip_time_point = 1)
 pSILAC_object <- KdeggeR::filterMonotoneTimePoint1(pSILAC_object)
 ```
 
   - Removes precursors which do not follow the expected trend, including time point 1. 
 
-```{r filter monotone trend, eval = TRUE}
+```{r filter monotone trend, eval = FALSE}
 # example code, does not modify the pSILAC object
 KdeggeR::filterMonotone(pSILAC_object, skip_time_point = 0)
 ```
@@ -309,7 +309,7 @@ KdeggeR::filterMonotone(pSILAC_object, skip_time_point = 0)
   - Applies linear regression to the ln(H/L + 1) data and Grubbs' test to detect outliers in the first time point.
   - Time point 1 values with a Grubbs' test P value lower than a selected threshold (`p_cutoff`) and corresponding to curves with an R2 lower than selected threshold (`R2_cutoff`) will be replaced by NA in both ln(H/L + 1) data and RIA data. 
   
-```{r filter linear regression, eval = TRUE}
+```{r filter linear regression, eval = FALSE}
 pSILAC_object <- KdeggeR::filterLinearRegression(pSILAC_object, skip_time_point = 1, R2_cutoff = 0.9, p_cutoff = 0.05)
 ```
 
@@ -327,7 +327,7 @@ The value of RIAt changes over time as unlabeled proteins are gradually replaced
 
 Where RIA0 denotes the initial isotopic ratio and kloss the rate of loss of unlabeled protein. We assumed RIA0 = 1, as no heavy isotope was present at t = 0, thus the value of RIAt will decay exponentially from 1 to 0 after infinite time and used nonlinear least‐squares estimation to perform the fit. As discussed before, these assumptions may reduce measurement error, especially at the beginning of the experiment, where isotopic ratios are less accurate. 
 
-```{r fit precursor RIA k_loss, eval = TRUE}
+```{r fit precursor RIA k_loss, eval = FALSE}
 pSILAC_object <- KdeggeR::calcRIAkloss(pSILAC_object, ncores = NULL)
 ```
 
@@ -339,7 +339,7 @@ Then, the light precursor rate of loss can be modeled using the same model and a
 
 If the data are already filtered, the `startIntensity` of `max` can be used for the modeling, as the intensity in the first measured time point is the maximum one. Other options are available and might be used for unfiltered data, such as `median` or  `model`, see the function documentation.  
 
-```{r fit precursor NLI k_loss, eval = TRUE}
+```{r fit precursor NLI k_loss, eval = FALSE}
 pSILAC_object <- KdeggeR::calcNLIkloss(pSILAC_object, startIntensity = "max", ncores = NULL)
 ```
 
@@ -351,7 +351,7 @@ The heavy proteins are synthesized over time, leading to an increasing H/L ratio
 
 In the steady-state condition, the rates of protein synthesis and degradation reach equilibrium. This means that the rate at which new heavy-labeled proteins are synthesized must be balanced by the rate at which proteins are degraded or turned over (kloss).
 
-```{r fit precursor HOL k_loss, eval = TRUE}
+```{r fit precursor HOL k_loss, eval = FALSE}
 pSILAC_object <- calcHoLkloss(pSILAC_object, tryRobust = FALSE, ncores = NULL)
 ```
 
@@ -361,7 +361,7 @@ Protein-level kloss values can be calculated by different options including perf
 
 ## Peform weighted average
 
-```{r calculate protein k_loss, eval = TRUE}
+```{r calculate protein k_loss, eval = FALSE}
 pSILAC_object <- calcProteinsKloss(pSILAC_object, method = "complement", 
                        ag.metric = "mean", 
                        ag.weights = "both", 
@@ -372,7 +372,7 @@ pSILAC_object <- calcProteinsKloss(pSILAC_object, method = "complement",
 
 ## Direct export of protein-level kloss as a data.frame
 
-```{r calculate protein k_loss and export table, eval = TRUE}
+```{r calculate protein k_loss and export table, eval = FALSE}
 prot_kloss <- calcProteinsKloss(pSILAC_object, method = "RIA", 
                        ag.metric = "mean", 
                        ag.weights = "both", 
@@ -408,7 +408,7 @@ Optionally, protein half-lives from the degradation rate constant using the foll
 
 ## Import experimentally-determined kcd values
 
-```{r example kcd}
+```{r example kcd, eval = FALSE}
 input_kcd <- KdeggeR::example_kcd %>%
   dplyr::filter(sample %in% c("Cis_1", "Nor_1")) %>%
   dplyr::mutate(sample = gsub("_1", "", sample))
@@ -416,19 +416,19 @@ input_kcd <- KdeggeR::example_kcd %>%
 
 ## Calculate kdeg using kcd
 
-```{r calculate k_deg using kcd, eval = TRUE}
+```{r calculate k_deg using kcd, eval = FALSE}
 pSILAC_object <- KdeggeR::calcKdeg(pSILAC_object, rate_df = input_kcd, type = "kcd")
 ```
 
 ## Calculate kdeg using kperc
 
-```{r calculate k_deg using kperc, eval = TRUE}
+```{r calculate k_deg using kperc, eval = FALSE}
 pSILAC_object <- KdeggeR::calcKdeg(pSILAC_object, rate_df = NULL, type = "kperc", perc_neg = 0.01)
 ```
 
 ## Calculate t(1/2)
 
-```{r calculate protein halflife, eval = TRUE}
+```{r calculate protein halflife, eval = FALSE}
 pSILAC_object <- KdeggeR::calcHalflife(pSILAC_object)
 ```
 
@@ -438,7 +438,7 @@ pSILAC_object <- KdeggeR::calcHalflife(pSILAC_object)
 
 ### Plot precursor RIA model
 
-```{r}
+```{r, eval = FALSE}
 pSILAC_object$peptides %>%
   dplyr::slice_head(n = 10) %>%
   glimpse()
@@ -448,7 +448,7 @@ KdeggeR::plotPeptideRIA(pSILAC_object, peptide = "_NFALLGVGTSK_.2")
 
 ### Plot precursor ln(H/L +1) model
 
-```{r}
+```{r, eval = FALSE}
 KdeggeR::plotPeptideHoL(pSILAC_object, peptide = "_NFALLGVGTSK_.2")
 ```
 
@@ -456,18 +456,18 @@ KdeggeR::plotPeptideHoL(pSILAC_object, peptide = "_NFALLGVGTSK_.2")
 
 ### Plot protein RIA
 
-```{r}
+```{r, eval = FALSE}
 KdeggeR::plotProteinRIA(pSILAC_object, protein = "A0A0B4J2D5/P0DPI2")
 ```
 
 ### Plot protein HoL
 
-```{r}
+```{r, eval = FALSE}
 KdeggeR::plotProteinHol(pSILAC_object, protein = "A0A0B4J2D5/P0DPI2")
 ```
 
 ### Plot protein summary
 
-```{r, fig.dim=c(10,10)}
+```{r, fig.dim=c(10,10), eval = FALSE}
 KdeggeR::plotProtein(pSILAC_object, protein = "A0A0B4J2D5/P0DPI2")
 ```
