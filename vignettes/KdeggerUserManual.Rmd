@@ -51,7 +51,7 @@ install_github("yslproteomics/KdeggeR", build_vignettes = TRUE)
 
 ## Open the vignette
 
-```{r install KdeggeR, eval = FALSE}
+```{r open vignette, eval = FALSE}
 vignette("KdeggerUserManual", package = "KdeggeR")
 ```
 
