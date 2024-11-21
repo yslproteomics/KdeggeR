@@ -28,7 +28,7 @@ Before setting up this package, users should have R version 4.3.0 or higher, and
 
 ## Installation Guide
 
-To install all dependencies. 
+To install all dependencies: 
 
 ```{r}
 # Required packages
@@ -39,14 +39,14 @@ pacman::p_load(dplyr, purrr, stringr, tibble, outliers)
 install.packages("MASS")
 ```
 
-To install the package. 
+To install the package: 
 
 ```{r}
 library("devtools")
 install_github("yslproteomics/KdeggeR", build_vignettes = TRUE)
 ```
 
-To open the vignette with detailed instructions and example code. 
+To open the vignette with detailed instructions and example code: 
 
 ```{r}
 vignette("KdeggerUserManual", package = "KdeggeR")
@@ -162,7 +162,7 @@ pSILAC_object <- KdeggeR::calcAllRates(pSILAC_object, method = "RIA",
 
 This step takes about 1.6 min in a computer with the following specs: RAM 32 GB, CPU: 6 cores, 3.2 GHz/core. 
 
-### 4. Calculate protein degradation rate (k_deg) and halflife
+### 4. Calculate protein degradation rates (k_deg) and halflives
 
 See the example k_cd table (experimentally-determined cell division rates). 
 
@@ -171,7 +171,7 @@ KdeggeR::example_kcd %>%
   dplyr::glimpse()
 ```
 
-Calculate k_deg. 
+Calculate k_deg: 
 
 ```{r}
 # Using experimentally-derived k_cd
@@ -182,7 +182,7 @@ pSILAC_object <- KdeggeR::calcKdeg(pSILAC_object, rate_df = input_kcd, type = "k
 pSILAC_object <- KdeggeR::calcKdeg(pSILAC_object, rate_df = NULL, type = "kperc", perc_neg = 0.01)
 ```
 
-Calculate t(1/2)
+Calculate t(1/2): 
 
 ```{r}
 pSILAC_object <- KdeggeR::calcHalflife(pSILAC_object)
@@ -201,31 +201,31 @@ protein_table <- pSILAC_object$protein.kdeg %>%
 
 ### 6. Visualize results
 
-Plot precursor RIA model
+Plot precursor RIA model: 
 
 ```{r}
 KdeggeR::plotPeptideRIA(pSILAC_object, peptide = "_NFALLGVGTSK_.2")
 ```
 
-Plot precursor ln(H/L +1) model
+Plot precursor ln(H/L +1) model: 
 
 ```{r}
 KdeggeR::plotPeptideHoL(pSILAC_object, peptide = "_NFALLGVGTSK_.2")
 ```
 
-Plot protein RIA
+Plot protein RIA:
 
 ```{r}
 KdeggeR::plotProteinRIA(pSILAC_object, protein = "A0A0B4J2D5/P0DPI2")
 ```
 
-Plot protein HoL
+Plot protein HoL:
 
 ```{r}
 KdeggeR::plotProteinHol(pSILAC_object, protein = "A0A0B4J2D5/P0DPI2")
 ```
 
-Plot protein summary
+Plot protein summary:
 
 ```{r}
 KdeggeR::plotProtein(pSILAC_object, protein = "A0A0B4J2D5/P0DPI2")
