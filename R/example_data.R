@@ -34,3 +34,9 @@
 #'@description This file contains Kcd values of the A2780 and A2780Cis cell lines. 
 #'
 "example_kcd"
+
+#'@title Example Output from the demo analysis
+#'
+#'@description This file is a pSILAc class object with all precursor and protein-level rates estimated. 
+#'
+"example_spectronaut_pSILAC_object"
