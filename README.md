@@ -14,6 +14,8 @@ See the preprint for a more detailed description of the package's functions and 
 
 This package requires only a standard computer with enough RAM to support the operations defined by a user.
 
+The package was developed and tested in a computer with the following specs: RAM 32 GB, CPU: 6 cores, 3.2 GHz/core.
+
 ## Software requirements
 
 This package was tested on macOS and Windows operating systems. The development version of the package has been tested on the following systems:
@@ -22,7 +24,6 @@ macOS Sonoma, version 14.3.1
 Microsoft Windows 11, version 10.0.22631
 
 Before setting up this package, users should have R version 4.3.0 or higher, and install the dependencies as specified below. 
-
 
 
 ## Installation Guide
@@ -51,6 +52,8 @@ To open the vignette with detailed instructions and example code.
 vignette("KdeggerUserManual", package = "KdeggeR")
 ```
 
+The installation takes about 30 seconds in a computer with the following specs: RAM 32 GB, CPU: 6 cores, 3.2 GHz/core. 
+
 ## How to Cite
 
 If you use the KdeggeR package in your work, please cite the following preprint. 
@@ -62,7 +65,7 @@ bioRxiv 2024.10.28.620709; doi: https://doi.org/10.1101/2024.10.28.620709
 
 ## Quick guide
 
-This guide provides general workflow how to run the analysis using provided datasets. For more details please see the package vignette and the package documentation. 
+This guide provides general workflow how to run the demo analysis using provided datasets. For more details please see the package vignette and the package documentation. 
 
 ### Example data
 
@@ -119,6 +122,8 @@ pSILAC_object_replicates <- KdeggeR::generatepSILACObject(dataset = input_data,
                                    noiseCutoff = 8)
 ```
 
+This step takes about 6 seconds and 13 seconds (with replicate aggregation) in a computer with the following specs: RAM 32 GB, CPU: 6 cores, 3.2 GHz/core. 
+
 ### Data quality filtering
 
 ```{r}
@@ -133,15 +138,19 @@ pSILAC_object <- KdeggeR::filterMonotoneTimePoint1(pSILAC_object)
 pSILAC_object <- KdeggeR::filterLinearRegression(pSILAC_object, skip_time_point = 1, R2_cutoff = 0.9, p_cutoff = 0.05)
 ```
 
+This step takes about 1.5 min in a computer with the following specs: RAM 32 GB, CPU: 6 cores, 3.2 GHz/core. 
+
 ### Calculate all rates
 
 This is a convenient wrapper function to perform precursor-level k_loss estimation using all three models and protein-level k_loss aggregation using weighted average of precursor-level k_loss values using default parameters. 
 
 ```{r}
-pSILAC_object <- calcAllRates(pSILAC_object, method = "RIA", 
+pSILAC_object <- KdeggeR::calcAllRates(pSILAC_object, method = "RIA", 
                   ag.metric = "mean", 
                   ag.weights = "both")
 ```
+
+This step takes about 1.6 min in a computer with the following specs: RAM 32 GB, CPU: 6 cores, 3.2 GHz/core. 
 
 ### Calculate protein degradation rate (k_deg) and halflife
 
@@ -168,6 +177,8 @@ Calculate t(1/2)
 ```{r}
 pSILAC_object <- KdeggeR::calcHalflife(pSILAC_object)
 ```
+
+These steps take less than 1 s in a computer with the following specs: RAM 32 GB, CPU: 6 cores, 3.2 GHz/core. 
 
 ### Visualize results
 
