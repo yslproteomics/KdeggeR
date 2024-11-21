@@ -65,7 +65,7 @@ bioRxiv 2024.10.28.620709; doi: https://doi.org/10.1101/2024.10.28.620709
 
 ## Quick demo analysis guide
 
-This guide provides a general workflow how to run the demo analysis using provided datasets. For more details please see the vignette and documentation. 
+This guide provides a general workflow how to run the demo analysis using provided datasets. For more details and options please see the vignette and documentation. 
 
 The example dataset contains a data.frame containing the first 20,000 unique precursors from the A2780Cis and A2780 parental cell line dataset analyzed using the labeled workflow in Spectronaut v19 using the Group Q-value filtering. The full dataset will be available through the PRIDE repository with the dataset identifier PXD057632. 
 
