@@ -101,7 +101,7 @@ KdeggeR::example_spectronaut_pSILAC_object %>%
   View()
 ```
 
-### Generate pSILAC class object 
+### 1. Generate pSILAC class object 
 
 ```{r}
 # Analysis without replicate design
@@ -132,7 +132,7 @@ pSILAC_object_replicates <- KdeggeR::generatepSILACObject(dataset = input_data,
 
 This step takes about 6 seconds and 13 seconds (with replicate aggregation) in a computer with the following specs: RAM 32 GB, CPU: 6 cores, 3.2 GHz/core. 
 
-### Data quality filtering
+### 2. Data quality filtering
 
 ```{r}
 # Filter based on valid values
@@ -148,7 +148,7 @@ pSILAC_object <- KdeggeR::filterLinearRegression(pSILAC_object, skip_time_point 
 
 This step takes about 1.5 min in a computer with the following specs: RAM 32 GB, CPU: 6 cores, 3.2 GHz/core. 
 
-### Calculate all rates
+### 3. Calculate k_loss
 
 This is a convenient wrapper function to perform precursor-level k_loss estimation using all three models and protein-level k_loss aggregation using weighted average of precursor-level k_loss values using default parameters. 
 
@@ -160,7 +160,7 @@ pSILAC_object <- KdeggeR::calcAllRates(pSILAC_object, method = "RIA",
 
 This step takes about 1.6 min in a computer with the following specs: RAM 32 GB, CPU: 6 cores, 3.2 GHz/core. 
 
-### Calculate protein degradation rate (k_deg) and halflife
+### 4. Calculate protein degradation rate (k_deg) and halflife
 
 See the example k_cd table (experimentally-determined cell division rates). 
 
@@ -188,7 +188,7 @@ pSILAC_object <- KdeggeR::calcHalflife(pSILAC_object)
 
 These steps take less than 1 s in a computer with the following specs: RAM 32 GB, CPU: 6 cores, 3.2 GHz/core. 
 
-### Export protein degradation rates
+### 5. Export protein degradation rates
 
 ```{r}
 # Protein degradation rates are stored in the protein.kdeg dataframe
@@ -197,7 +197,7 @@ protein_table <- pSILAC_object$protein.kdeg %>%
   dplyr::glimpse()
 ```
 
-### Visualize results
+### 6. Visualize results
 
 Plot precursor RIA model
 
