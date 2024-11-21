@@ -63,7 +63,7 @@ Barbora Salovska, Wenxue Li, Oliver M. Bernhardt, Pierre-Luc Germain, Tejas Gand
 bioRxiv 2024.10.28.620709; doi: https://doi.org/10.1101/2024.10.28.620709
 
 
-## Quick guide
+## Quick demo analysis guide
 
 This guide provides general workflow how to run the demo analysis using provided datasets. For more details please see the package vignette and the package documentation. 
 
@@ -94,6 +94,13 @@ KdeggeR::example_spectronaut_design_replicates %>%
   dplyr::glimpse()
 ```
 
+See the example output pSILAC object. 
+
+```{r}
+KdeggeR::example_spectronaut_pSILAC_object %>% 
+  View()
+```
+
 ### Generate pSILAC class object 
 
 ```{r}
@@ -109,6 +116,7 @@ pSILAC_object <- KdeggeR::generatepSILACObject(dataset = input_data,
                                    ncores = NULL,
                                    noiseCutoff = 8)
                                    
+
 # Analysis with replicate design
 input_data <- KdeggeR::example_spectronaut
 input_design <- KdeggeR::example_spectronaut_design_replicates
@@ -179,6 +187,15 @@ pSILAC_object <- KdeggeR::calcHalflife(pSILAC_object)
 ```
 
 These steps take less than 1 s in a computer with the following specs: RAM 32 GB, CPU: 6 cores, 3.2 GHz/core. 
+
+### Export protein degradation rates
+
+```{r}
+# Protein degradation rates are stored in the protein.kdeg dataframe
+protein_table <- pSILAC_object$protein.kdeg %>%
+  tibble::rownames_to_column("Protein_ID") %>%
+  dplyr::glimpse()
+```
 
 ### Visualize results
 
