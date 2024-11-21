@@ -1,21 +1,36 @@
 # KdeggeR
 
-## Brief Description
+## Overview
 
 The KdeggeR package is designed to perform peptide and protein turnover rates estimation from dynamic SILAC labeling (pulse-SILAC, or pSILAC) proteomic experiments analyzed using multiplex DIA-MS. The package is optimized to handle DIA-MS data processed using commong raw MS data processing tools such as Spectronaut, DIA-NN, or Fragpipe, but can handle data measured using DDA-MS and analyzed with software tools like MaxQuant. The package offers optimized input data filtering, several kloss estimation methods for precursor/peptide level data, and functions for protein kloss and kdeg aggregation. The curve fits can be also inspected and exported using provided functions.
+
+## Documentation
 
 See the vignette for detailed instructions and example code.
 
 See the preprint for a more detailed description of the package's functions and applications: doi: https://doi.org/10.1101/2024.10.28.620709
 
-## How to Install 
+## Hardware Requirements
+
+This package requires only a standard computer with enough RAM to support the operations defined by a user.
+
+## Software requirements
+
+This package was tested on macOS and Windows operating systems. The development version of the package has been tested on the following systems:
+
+macOS Sonoma, version 14.3.1
+Microsoft Windows 11, version 10.0.22631
+
+Before setting up this package, users should have R version 4.3.0 or higher, and install the dependencies as specified below. 
+
+## Installation Guide
 
 To install all dependencies. 
 
 ```{r}
 # Required packages
 if(!require(pacman)) install.packages("pacman")
-pacman::p_load(dplyr, outliers, purrr, stringr, tibble)
+pacman::p_load(dplyr, purrr, stringr, tibble, outliers)
 
 # Optional R package for robust linear model fitting
 install.packages("MASS")
