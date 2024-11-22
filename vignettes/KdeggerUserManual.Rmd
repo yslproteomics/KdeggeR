@@ -93,8 +93,8 @@ KdeggeR::example_spectronaut %>%
 
 ```{r example data isw, eval = FALSE}
 KdeggeR::example_spectronaut_isw %>%
-  dplyr::rename_with(~gsub("EG.TargetQuantity", "EG.Channel2Quantity", .), .cols = dplyr::ends_with("EG.TargetQuantity")) %>%
-  dplyr::rename_with(~gsub("EG.ReferenceQuantity", "EG.Channel1Quantity", .), .cols = dplyr::ends_with("EG.ReferenceQuantity"))
+  dplyr::rename_with(~gsub("EG.TargetQuantity..Settings.", "EG.Channel2Quantity", .), .cols = dplyr::ends_with("EG.TargetQuantity..Settings.")) %>%
+  dplyr::rename_with(~gsub("EG.ReferenceQuantity..Settings.", "EG.Channel1Quantity", .), .cols = dplyr::ends_with("EG.ReferenceQuantity..Settings."))
 ```
 
 ### DIA-NN and Fragpipe data, plexDIA
