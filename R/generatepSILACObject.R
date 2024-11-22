@@ -143,7 +143,7 @@ generatepSILACObject <- function(dataset, design, inputDataType = "spectronaut",
       dplyr::rename("Proteins" = Protein.Group) %>%
       dplyr::rename("id" = Precursor.Id) %>%
       dplyr::rename_with(.cols = ends_with(".L"), ~gsub("(.*).L", "Intensity.L.\\1", .)) %>%
-      dplyr::rename_with(.cols = ends_with(".L"), ~gsub("(.*).H", "Intensity.H.\\1", .)) %>%
+      dplyr::rename_with(.cols = ends_with(".H"), ~gsub("(.*).H", "Intensity.H.\\1", .)) %>%
       dplyr::select(id, Proteins, dplyr::starts_with("Intensity."))
     
     row.names(dataset) <- dataset$id
