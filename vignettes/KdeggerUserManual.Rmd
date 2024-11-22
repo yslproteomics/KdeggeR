@@ -274,6 +274,45 @@ pSILAC_object <- KdeggeR::generatepSILACObject(dataset = input_data,
                                    noiseCutoff = 8)
 ```
 
+### DIA-NN 1.9 example
+
+  - Use example data provided in the KdeggeR package. 
+
+```{r generate pSILAC object diann in R, eval = FALSE}
+input_data <- KdeggeR::example_diann
+input_design <- KdeggeR::example_diann_design
+
+pSILAC_object <- KdeggeR::generatepSILACObject(dataset = input_data, 
+                                   design = input_design, 
+                                   inputDataType = "diann",
+                                   aggregate.replicates = NA, # if NA, replicates are not aggregated
+                                   filterPeptides = T, 
+                                   ncores = NULL,
+                                   noiseCutoff = 8)
+
+pSILAC_object$info
+pSILAC_object$design
+```
+
+### DIA-NN 1.9, use filepath
+
+  - The files are provided in the inst/data_tsv directory via the GitHub repository. 
+  - The function will load the files using the provided paths and process the data. 
+
+```{r generate pSILAC object diann file path, eval = FALSE}
+# design without replicates
+input_data <- paste(.libPaths()[1], "KdeggeR/data_tsv/example_data_pSILAC_diann_1,9.tsv", sep = "/")
+input_design <- paste(.libPaths()[1], "KdeggeR/data_tsv/example_design_table_pSILAC_diann_1,9.tsv", sep = "/")
+
+pSILAC_object <- KdeggeR::generatepSILACObject(dataset = input_data, 
+                                   design = input_design, 
+                                   inputDataType = "diann", # inputDataType needs to be correctly specified
+                                   aggregate.replicates = NA, # if NA, replicates are not aggregated
+                                   filterPeptides = T, 
+                                   ncores = NULL,
+                                   noiseCutoff = 8)
+```
+
 # Filter data
 
 We recommend to apply several data filtering steps before model fitting. These filtering steps are optional for the downstream analysis, but improve the results of the modeling using both non-linear least squares (NLS) fitting and linear modeling (lm) of the precursor and protein turnover rates. In principle, the data do not need any filtering based on valid values, since the model can still estimate rates using a single data point. However, in a dataset with a low level of missing values, these lower potentially quality fits can be removed. 
@@ -453,9 +492,11 @@ pSILAC_object <- KdeggeR::calcHalflife(pSILAC_object)
 ```{r, eval = FALSE}
 pSILAC_object$peptides %>%
   dplyr::slice_head(n = 10) %>%
-  glimpse()
+  dplyr::glimpse()
 
+# Spectronaut example
 KdeggeR::plotPeptideRIA(pSILAC_object, peptide = "_NFALLGVGTSK_.2")
+
 ```
 
 ### Plot precursor ln(H/L +1) model
