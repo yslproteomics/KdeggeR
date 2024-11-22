@@ -7,15 +7,15 @@
 #'
 "example_spectronaut"
 
-#'@title Example deign table for the A2780 pSILAC dataset (analyzed in Spectronaut 19)
+#'@title Example design table for the A2780 pSILAC dataset (analyzed in Spectronaut 19)
 #'
-#'@description This dataset contains and example desigb table to run a pSILAC data analysis without replicate design. 
+#'@description This dataset contains and example design table to run a pSILAC data analysis without replicate design. 
 #'
 "example_spectronaut_design"
 
-#'@title Example deign table for the A2780 pSILAC dataset (analyzed in Spectronaut 19) - replicate design
+#'@title Example design table for the A2780 pSILAC dataset (analyzed in Spectronaut 19) - replicate design
 #'
-#'@description This dataset contains and example desigb table to run a pSILAC data analysis with a replicate design. 
+#'@description This dataset contains and example design table to run a pSILAC data analysis with a replicate design. 
 #'Note, the replicate number must be specified and the grouping must be reflected in the sample column. 
 #'
 "example_spectronaut_design_replicates"
@@ -28,6 +28,12 @@
 #'The data were analyzed and exported from DIA-NN 1.9. 
 #'
 "example_diann"
+
+#'@title Example design table for the A2780 pSILAC dataset (analyzed in DIA-NN 1.9)
+#'
+#'@description This dataset contains and example design table to run a pSILAC data analysis without replicate design. 
+#'
+"example_diann_design"
 
 #'@title Example Kcd file
 #'
