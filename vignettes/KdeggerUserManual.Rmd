@@ -159,9 +159,14 @@ row.names(KdeggeR::example_spectronaut_design_replicates)
   
 ```{r generate design table, eval = FALSE}
 # use path to the file
-input_data <- paste(.libPaths()[1], "KdeggeR/inst/data_tsv/example_data_pSILAC_SN19.tsv", sep = "/")
+input_data <- paste(.libPaths()[1], "KdeggeR/data_tsv/example_data_pSILAC_SN19.tsv", sep = "/")
 
 KdeggeR::generateDesignTemplate(dataset = input_data, inputDataType = "spectronaut")
+
+# use path to the file
+input_data <- paste(.libPaths()[1], "KdeggeR/data_tsv/example_data_pSILAC_diann_1,9.tsv", sep = "/")
+
+KdeggeR::generateDesignTemplate(dataset = input_data, inputDataType = "diann")
 ```
 
 ## kcd table
@@ -246,8 +251,8 @@ pSILAC_object$design
 
 ```{r generate pSILAC object using file path, eval = FALSE}
 # design without replicates
-input_data <- paste(.libPaths()[1], "KdeggeR/inst/data_tsv/example_data_pSILAC_SN19.tsv", sep = "/")
-input_design <- paste(.libPaths()[1], "KdeggeR/inst/data_tsv/example_design_table_pSILAC_SN19_no_replicates.txt", sep = "/")
+input_data <- paste(.libPaths()[1], "KdeggeR/data_tsv/example_data_pSILAC_SN19.tsv", sep = "/")
+input_design <- paste(.libPaths()[1], "KdeggeR/data_tsv/example_design_table_pSILAC_SN19_no_replicates.txt", sep = "/")
 
 pSILAC_object <- KdeggeR::generatepSILACObject(dataset = input_data, 
                                    design = input_design, 
@@ -258,7 +263,7 @@ pSILAC_object <- KdeggeR::generatepSILACObject(dataset = input_data,
                                    noiseCutoff = 8)
 
 # design with replicates
-input_design <- paste(.libPaths()[1], "KdeggeR/inst/data_tsv/example_design_table_pSILAC_SN19_replicates.txt", sep = "/")
+input_design <- paste(.libPaths()[1], "KdeggeR/data_tsv/example_design_table_pSILAC_SN19_replicates.txt", sep = "/")
 
 pSILAC_object <- KdeggeR::generatepSILACObject(dataset = input_data, 
                                    design = input_design, 
