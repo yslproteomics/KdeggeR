@@ -18,7 +18,8 @@ Suggests:
     rmarkdown,
     rmdformats,
     MASS, 
-    limma
+    limma,
+    knitr
 VignetteBuilder: knitr
 Depends: 
     R (>= 4.3.1)
