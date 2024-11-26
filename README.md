@@ -204,29 +204,29 @@ protein_table <- pSILAC_object$protein.kdeg %>%
 Plot precursor RIA model: 
 
 ```{r}
-KdeggeR::plotPeptideRIA(pSILAC_object, peptide = "_NFALLGVGTSK_.2")
+KdeggeR::plotPeptideRIA(pSILAC_object, peptide = "_MLIPYIEHWPR_.3")
 ```
 
 Plot precursor ln(H/L +1) model: 
 
 ```{r}
-KdeggeR::plotPeptideHoL(pSILAC_object, peptide = "_NFALLGVGTSK_.2")
+KdeggeR::plotPeptideHoL(pSILAC_object, peptide = "_MLIPYIEHWPR_.3")
 ```
 
 Plot protein RIA:
 
 ```{r}
-KdeggeR::plotProteinRIA(pSILAC_object, protein = "A0A0B4J2D5/P0DPI2")
+KdeggeR::plotProteinRIA(pSILAC_object, protein = "O75208")
 ```
 
 Plot protein HoL:
 
 ```{r}
-KdeggeR::plotProteinHol(pSILAC_object, protein = "A0A0B4J2D5/P0DPI2")
+KdeggeR::plotProteinHol(pSILAC_object, protein = "O75208")
 ```
 
 Plot protein summary:
 
 ```{r}
-KdeggeR::plotProtein(pSILAC_object, protein = "A0A0B4J2D5/P0DPI2")
+KdeggeR::plotProtein(pSILAC_object, protein = "O75208")
 ```
