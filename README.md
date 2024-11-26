@@ -52,6 +52,9 @@ To open the vignette with detailed instructions and example code:
 vignette("KdeggerUserManual", package = "KdeggeR")
 ```
 
+The .pdf version of the vignette is also provided [here](https://github.com/yslproteomics/KdeggeR/blob/main/inst/manual/KdeggerUserManual.pdf). 
+
+
 The installation takes about 30 seconds in a computer with the following specs: RAM 32 GB, CPU: 6 cores, 3.2 GHz/core. 
 
 ## How to Cite
