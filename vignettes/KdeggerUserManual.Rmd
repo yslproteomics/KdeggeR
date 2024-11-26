@@ -408,7 +408,15 @@ pSILAC_object <- KdeggeR::calcHoLkloss(pSILAC_object, tryRobust = FALSE, ncores 
 
 # Calculate protein k_loss
 
-Protein-level kloss values can be calculated by different options including performing a weighted average of the selected fit (e.g., RIA only) or their combination/complement (e.g., RIA and NLI). The number of data points used to estimate precursor-level kloss, the variance of the fit, or both can be used as weights.
+Protein-level k_loss values can be calculated by different options including performing a weighted average of the selected fit (e.g., RIA only) or their combination/complement (e.g., RIA and NLI). The number of data points used to estimate precursor-level k_loss, the variance of the fit, or both can be used as weights.
+
+The `method` can be set either to `RIA`, `hol`, or `NLI`, which uses only the selected precursor-level k_loss to calculate protein level k_loss. Alternatively, the `combined` and `complement` methods use both RIA-based and NLI-based k_loss. The `combined` method selects the most stable estimate between `RIA` and `NLI`, while the `complement` method primarily uses the RIA-based estimates and complements them with the NLI-based estimates, when the RIA-based are missing. A `source` column in the output protein k_loss table indicates whether RIA or NLI-based calculation was used for a specific protein. 
+
+The `ag.metric` can be set as either `mean` or `median`. If `mean`, the protein-level k_loss values are calculated as a weighted average. The weights can be specified using the `ag.weights` parameter as `nbpoints`, `variance`, or `both`.
+
+The `returnKlossTableOnly` parameter controls whether the protein k_loss values are saved in the pSILAC object or exported as a data.frame in the R enviroment. Optionally, the standard deviations can be reported by setting the `returnSD` parameter to TRUE. 
+
+See the function doumentation `?calcProteinsKloss` for more details. 
 
 ## Perform weighted average
 
@@ -416,12 +424,12 @@ Protein-level kloss values can be calculated by different options including perf
 pSILAC_object <- KdeggeR::calcProteinsKloss(pSILAC_object, method = "complement", 
                        ag.metric = "mean", 
                        ag.weights = "both", 
-                       ncores = 1, 
-                       returnKlossTableOnly = F, 
+                       ncores = NULL, 
+                       returnKlossTableOnly = F, # the data will be saved in the pSILAC object
                        returnSD = F )
 ```
 
-## Direct export of protein-level kloss as a data.frame
+## Direct export of protein-level k_loss
 
 The `returnKlossTableOnly = T` will directly return the protein k_loss data.frame rather than updating the pSILAC object.
 
@@ -438,7 +446,7 @@ prot_kloss <- KdeggeR::calcProteinsKloss(pSILAC_object, method = "RIA",
 
 The `calcAllRates()` function is a wrapper function that calc the individual functions above to perform precursor k_loss calculation using the RIA, ln(H/L +1), and NLI data. 
 
-Then it aggregates the precursor-level estimates into protein k_loss estimates using the selected method.
+Then it aggregates the precursor-level estimates into protein k_loss estimates using the selected method. It accepts the same parameters as the functions above. 
 
 ```{r fit all rates, eval = FALSE}
 pSILAC_object <- KdeggeR::calcAllRates(pSILAC_object, method = "complement", 
