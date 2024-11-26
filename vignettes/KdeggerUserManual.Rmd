@@ -460,7 +460,7 @@ Protein degradation rates are estimated by subtracting the cell division rates (
 
   - k_deg=k_loss-k_cd
 
-However, practically, the cell division rates tend to be very variable between different experiments and thus the precision and accuracy tend to be low. Therefore, we enabled the option to use a kcd derived from the distribution of the kloss values by assuming that most kdeg values should be positive after the correction. We suggest a value (kperc) by subtraction of which only 1% of kdeg values would be negative that the users may be able to estimate the kdeg values in cell culture derived datasets. 
+However, practically, the cell division rates tend to be very variable between different experiments and thus the precision and accuracy tend to be low. Therefore, we enabled the option to use a k_cd derived from the distribution of the k_loss values by assuming that most k_deg values should be positive after the correction. We suggest a value (k_perc) by subtraction of which only 1% of k_deg values would be negative. 
 
   - k_deg=k_loss-k_perc
   
@@ -477,17 +477,23 @@ input_kcd <- KdeggeR::example_kcd %>%
 
 ## Calculate kdeg using kcd
 
+To use the experimentally-derived `kcd` value  set the `type` parameter to `kcd` and provide a data.frame with the k_cd values using the `rate_df` parameter.
+
 ```{r calculate k_deg using kcd, eval = FALSE}
 pSILAC_object <- KdeggeR::calcKdeg(pSILAC_object, rate_df = input_kcd, type = "kcd")
 ```
 
 ## Calculate kdeg using kperc
 
+To use the theoretical `kperc` value  set the `type` parameter to `kperc`. The percentage of negative k_deg values after the k_perc subtraction can be set using the `perc_neg` parameter. Based on our experience, setting this paramater to a value between 0.01 and 0.05 performs the best, and we also observed such as percentage of negative k_deg values when we subtracted the experimentally-derived k_cd values. 
+
 ```{r calculate k_deg using kperc, eval = FALSE}
 pSILAC_object <- KdeggeR::calcKdeg(pSILAC_object, rate_df = NULL, type = "kperc", perc_neg = 0.01)
 ```
 
 ## Calculate t(1/2)
+
+The halflives are calculated using the formula described above. 
 
 ```{r calculate protein halflife, eval = FALSE}
 pSILAC_object <- KdeggeR::calcHalflife(pSILAC_object)
@@ -497,6 +503,8 @@ pSILAC_object <- KdeggeR::calcHalflife(pSILAC_object)
 
 ## Precursor/peptide
 
+Plot peptide-level fit. 
+
 ### Plot precursor RIA model
 
 ```{r, eval = FALSE}
@@ -505,14 +513,14 @@ pSILAC_object$peptides %>%
   dplyr::glimpse()
 
 # Spectronaut example
-KdeggeR::plotPeptideRIA(pSILAC_object, peptide = "_NFALLGVGTSK_.2")
-
+# Choose a peptide to visualize
+KdeggeR::plotPeptideRIA(pSILAC_object, peptide = "_MLIPYIEHWPR_.3")
 ```
 
 ### Plot precursor ln(H/L +1) model
 
 ```{r, eval = FALSE}
-KdeggeR::plotPeptideHoL(pSILAC_object, peptide = "_NFALLGVGTSK_.2")
+KdeggeR::plotPeptideHoL(pSILAC_object, peptide = "_MLIPYIEHWPR_.3")
 ```
 
 ## Protein
