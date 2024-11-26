@@ -545,3 +545,144 @@ Plots both RIA-based and ln(H/L +1)-based protein k_loss fit and peptide-level k
 ```{r, fig.dim=c(10,10), eval = FALSE}
 KdeggeR::plotProtein(pSILAC_object, protein = "O75208")
 ```
+
+# Statistical analysis
+
+Statistical analysis of the example dataset can be performed using the `limma` package after log2 transformation and valid values filtering of the k_deg values. 
+
+In the example dataset, a cisplatin-resistant cell line, A2780Cis ("Cis"), is compared to a cisplatin-sensitive, parental cell line, A2780 ("Nor"). 
+
+## Transform and filter k_deg data
+
+```{r, eval = FALSE}
+# select how to filter data based on valid values 
+n_replicates <- 2 # at least 2 replicates
+
+prot_kdeg <- pSILAC_object$protein.kdeg %>%
+  # log2 transform
+  dplyr::mutate(across(.cols = everything(), 
+                       ~suppressWarnings(log2(.)))) %>% 
+  # calculate valid values per condition
+  tibble::rownames_to_column("id") %>%
+  dplyr::rowwise() %>%
+  dplyr::mutate(
+    valid_Cis = sum(!is.na(dplyr::c_across(contains("Cis"))) & 
+                      !is.infinite(dplyr::c_across(contains("Cis")))),  
+    valid_Nor = sum(!is.na(dplyr::c_across(contains("Nor"))) & 
+                      !is.infinite(dplyr::c_across(contains("Nor"))))   
+  ) %>%
+  dplyr::ungroup() %>%
+  dplyr::glimpse() %>%
+  # filter based on valid values
+  dplyr::filter(valid_Cis >= n_replicates & 
+                  valid_Nor >= n_replicates) %>%
+  dplyr::select(-starts_with("valid_")) %>%
+  as.data.frame() %>%
+  tibble::column_to_rownames("id") %>%
+  dplyr::glimpse()
+```
+
+## Statistical analysis - moderated t-test
+
+The statistical analysis in this examples is performed using the `limma` package. 
+
+### Load the package
+
+```{r, eval = FALSE}
+library(limma)
+```
+
+### Generate condition matrix
+
+```{r, eval = FALSE}
+condition_matrix <- data.frame(sample_name = colnames(prot_kdeg)) %>%
+  dplyr::mutate(condition = gsub("_\\d{1}$", "", sample_name))
+```
+
+### Generate design matrix
+
+```{r, eval = FALSE}
+design_matrix <- model.matrix(~0 + condition, 
+                              data = condition_matrix)
+
+colSums(design_matrix)
+```
+
+### Generate contrast matrix
+
+```{r, eval = FALSE}
+contrast_matrix <- makeContrasts(Cis_Nor = conditionCis - conditionNor, 
+                    levels = design_matrix)
+contrast_matrix
+```
+
+### Fit linear model into the data
+
+```{r, eval = FALSE}
+# Fit linear model for each protein
+fit.linear <- limma::lmFit(prot_kdeg, 
+                           design_matrix)
+
+# Given a linear model fit to the data, 
+# compute estimated coefficients and standard errors 
+# for a given set of contrasts.
+fit.test <- limma::contrasts.fit(fit.linear, 
+                                 contrasts = contrast_matrix)
+```
+
+### Compute moderated statistics using eBayes
+
+```{r, eval = FALSE}
+# Fit linear model for each protein
+fit.linear <- limma::lmFit(prot_kdeg, 
+                           design_matrix)
+
+# Given a linear model fit to the data, 
+# compute estimated coefficients and 
+# standard errors for a given set of contrasts
+fit.test <- limma::contrasts.fit(fit.linear, 
+                                 contrasts = contrast_matrix)
+
+# Given a linear model fit from lmFit, compute moderated t-statistics, 
+# moderated F-statistic, and log-odds of differential expression by 
+# empirical Bayes moderation of the standard errors towards a global value.
+fit.test <- limma::eBayes(fit.test)
+
+# results table containing all proteins
+results <- limma::topTable(fit.test, 
+                                adjust.method = "none", 
+                                p.value = 1, 
+                                lfc = log2(1), 
+                                number = nrow(prot_kdeg))
+
+results <- results %>%
+  tibble::rownames_to_column("id")
+```
+
+### Example volcano plot
+
+```{r, fig.dim=c(8,6), eval = FALSE}
+results %>%
+  dplyr::mutate(
+    significant = ifelse(
+      adj.P.Val < 0.05 & logFC > log2(1.5), "upregulated",
+      ifelse(adj.P.Val < 0.05 & logFC < -log2(1.5), "downregulated", "nonregulated")
+    )
+  ) %>%
+  ggplot(aes(x = logFC, y = -log10(adj.P.Val), 
+             color = significant, 
+             size = significant, 
+             alpha = significant)) +
+  geom_point(shape = 4) +
+  theme_light() +
+  labs(title = "A2780Cis x A2780") +
+  scale_color_manual(values = c("steelblue3", "grey80", "gold1")) +
+  scale_alpha_manual(values = c(0.8, 0.5, 0.8)) +
+  scale_size_manual(values = c(1, 0.5, 1)) +
+  geom_hline(yintercept = -log10(0.05), color = "darkred", 
+             linetype = "dashed") +
+  geom_vline(xintercept = c(log2(1 / 1.5), log2(1.5)), 
+             color = "darkred", linetype = "dashed") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
