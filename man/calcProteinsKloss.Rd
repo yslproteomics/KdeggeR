@@ -34,7 +34,7 @@ calcProteinsKloss(
 \describe{
   \item{`"mean"` (default)}{Calculates the mean of peptide-level k_loss values; if `ag.weights` is provided, a weighted mean is calculated.}
   \item{`"median"`}{Calculates the median of peptide-level k_loss values.}
-  \item{`"remodel"`}{Uses the `modelProteinsKloss` function to re-fit protein models using all peptide-level data. Does not work in the current version}
+  \item{`"remodel"`}{Uses the `modelProteinsKloss` function to re-fit protein models using all peptide-level data. Does not work in the current version of KdeggeR.}
 }}
 
 \item{ag.weights}{Character string defining the weighting method for the weighted mean. Ignored if `ag.metric` is not set to `"mean"`. Options are:

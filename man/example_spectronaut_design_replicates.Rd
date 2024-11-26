@@ -3,7 +3,7 @@
 \docType{data}
 \name{example_spectronaut_design_replicates}
 \alias{example_spectronaut_design_replicates}
-\title{Example deign table for the A2780 pSILAC dataset (analyzed in Spectronaut 19) - replicate design}
+\title{Example design table for the A2780 pSILAC dataset (analyzed in Spectronaut 19) - replicate design}
 \format{
 An object of class \code{data.frame} with 24 rows and 5 columns.
 }
@@ -11,7 +11,7 @@ An object of class \code{data.frame} with 24 rows and 5 columns.
 example_spectronaut_design_replicates
 }
 \description{
-This dataset contains and example desigb table to run a pSILAC data analysis with a replicate design. 
+This dataset contains and example design table to run a pSILAC data analysis with a replicate design. 
 Note, the replicate number must be specified and the grouping must be reflected in the sample column.
 }
 \keyword{datasets}

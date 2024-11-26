@@ -9,7 +9,7 @@ generateDesignTemplate(dataset, inputDataType = "spectronaut")
 \arguments{
 \item{dataset}{path to the data exported from MS data processing file}
 
-\item{inputDataType}{can be "spectronaut", "diann", or "fragpipe"}
+\item{inputDataType}{can be "spectronaut", "diann", or "fragpipe", output from other software are not supported (for this function)}
 }
 \description{
 Generate design table template
