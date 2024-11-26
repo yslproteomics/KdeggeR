@@ -503,7 +503,7 @@ pSILAC_object <- KdeggeR::calcHalflife(pSILAC_object)
 
 ## Precursor/peptide
 
-Plot peptide-level fit. 
+Plot the peptide-level fit of a selected peptide. The colors can be specified in the design table and customized by modifing the design data.frame of the pSILAC object.
 
 ### Plot precursor RIA model
 
@@ -513,7 +513,6 @@ pSILAC_object$peptides %>%
   dplyr::glimpse()
 
 # Spectronaut example
-# Choose a peptide to visualize
 KdeggeR::plotPeptideRIA(pSILAC_object, peptide = "_MLIPYIEHWPR_.3")
 ```
 
@@ -525,20 +524,24 @@ KdeggeR::plotPeptideHoL(pSILAC_object, peptide = "_MLIPYIEHWPR_.3")
 
 ## Protein
 
+Plot protein-level k_loss fit and all precursor-level datapoints. 
+
 ### Plot protein RIA
 
 ```{r, eval = FALSE}
-KdeggeR::plotProteinRIA(pSILAC_object, protein = "A0A0B4J2D5/P0DPI2")
+KdeggeR::plotProteinRIA(pSILAC_object, protein = "O75208")
 ```
 
 ### Plot protein HoL
 
 ```{r, eval = FALSE}
-KdeggeR::plotProteinHol(pSILAC_object, protein = "A0A0B4J2D5/P0DPI2")
+KdeggeR::plotProteinHol(pSILAC_object, protein = "O75208")
 ```
 
 ### Plot protein summary
 
+Plots both RIA-based and ln(H/L +1)-based protein k_loss fit and peptide-level k_loss distribution as boxplots. 
+
 ```{r, fig.dim=c(10,10), eval = FALSE}
-KdeggeR::plotProtein(pSILAC_object, protein = "A0A0B4J2D5/P0DPI2")
+KdeggeR::plotProtein(pSILAC_object, protein = "O75208")
 ```
