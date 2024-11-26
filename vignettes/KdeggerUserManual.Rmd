@@ -410,7 +410,7 @@ pSILAC_object <- KdeggeR::calcHoLkloss(pSILAC_object, tryRobust = FALSE, ncores 
 
 Protein-level kloss values can be calculated by different options including performing a weighted average of the selected fit (e.g., RIA only) or their combination/complement (e.g., RIA and NLI). The number of data points used to estimate precursor-level kloss, the variance of the fit, or both can be used as weights.
 
-## Peform weighted average
+## Perform weighted average
 
 ```{r calculate protein k_loss, eval = FALSE}
 pSILAC_object <- KdeggeR::calcProteinsKloss(pSILAC_object, method = "complement", 
@@ -422,6 +422,8 @@ pSILAC_object <- KdeggeR::calcProteinsKloss(pSILAC_object, method = "complement"
 ```
 
 ## Direct export of protein-level kloss as a data.frame
+
+The `returnKlossTableOnly = T` will directly return the protein k_loss data.frame rather than updating the pSILAC object.
 
 ```{r calculate protein k_loss and export table, eval = FALSE}
 prot_kloss <- KdeggeR::calcProteinsKloss(pSILAC_object, method = "RIA", 
