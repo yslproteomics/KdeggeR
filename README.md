@@ -8,6 +8,8 @@ The KdeggeR package is designed to perform peptide and protein turnover rates es
 
 See the vignette for detailed instructions and example code.
 
+The .pdf version of the vignette is provided [here](https://github.com/yslproteomics/KdeggeR/blob/main/inst/manual/KdeggerUserManual.pdf). 
+
 See the preprint for a more detailed description of the package's functions and applications: doi: https://doi.org/10.1101/2024.10.28.620709
 
 ## Hardware Requirements
@@ -51,9 +53,6 @@ To open the vignette with detailed instructions and example code:
 ```{r}
 vignette("KdeggerUserManual", package = "KdeggeR")
 ```
-
-The .pdf version of the vignette is also provided [here](https://github.com/yslproteomics/KdeggeR/blob/main/inst/manual/KdeggerUserManual.pdf). 
-
 
 The installation takes about 30 seconds in a computer with the following specs: RAM 32 GB, CPU: 6 cores, 3.2 GHz/core. 
 
