@@ -76,6 +76,9 @@ calcKdeg <- function(o, rate_df = NULL, type = "kperc", perc_neg = 0.01) {
     o$kcd <- rate_df
   }
   
+  prot_kdeg <- prot_kdeg %>%
+    dplyr::rename_with(., cols = everything(), ~gsub(".kloss", ".kdeg", .))
+  
   o$protein.kdeg <- prot_kdeg
   
   return(o)
