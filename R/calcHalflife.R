@@ -19,6 +19,9 @@ calcHalflife <- function(o) {
   prot_kdeg <- o$protein.kdeg
   prot_halflife <- log(2) / prot_kdeg
   
+  prot_halflife <- prot_halflife %>%
+    dplyr::rename_with(., cols = everything(), ~gsub(".kdeg", ".t1_2", .))
+  
   o$protein.halflife <- prot_halflife
   return(o)
 }
