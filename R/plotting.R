@@ -177,7 +177,11 @@ plotProteinRIA <- function(object, protein, samples=NULL, peptides.alpha=150,plo
   if(protein %in% row.names(object$protein.kloss)){
     f <- function(x,a){ exp(-a*x) }
     for(s in samples){
-      curve(f(x,object$protein.kloss[protein,s]),lwd=2,col=unique(object$design$color[which(object$design$sample==s)]),add=T)
+      curve(f(x,
+            object$protein.kloss[row.names(object$protein.kloss) == protein, paste(s,"kloss",sep=".")]),
+            lwd=2,
+            col=unique(object$design$color[which(object$design$sample==s)]),
+            add=TRUE)
     }
   }
   if(plot.legend)	legend("bottomleft",fill=object$design$color[!duplicated(object$design$sample) & object$design$sample %in% samples],legend=samples,bty="n")
@@ -215,6 +219,7 @@ plotPeptideRIA <- function(object, peptide, samples=NULL, peptides.alpha=150,plo
   if(peptide %in% row.names(object$RIA.kloss)){
     f <- function(x,a){ exp(-a*x) }
     for(s in samples){
+      if(is.na(object$RIA.kloss[peptide,paste(s,"kloss",sep=".")])){next}
       curve(f(x,object$RIA.kloss[peptide,paste(s,"kloss",sep=".")]),lwd=2,col=unique(object$design$color[which(object$design$sample==s)]),add=T)
     }
   }
@@ -253,6 +258,7 @@ plotPeptideHoL <- function(object, peptide, samples=NULL, peptides.alpha=150,plo
   plot(rep(object$design$time[w],nrow(phol)),as.numeric(t(phol)),col=sapply(rep(design$color,nrow(phol)),alpha=peptides.alpha,FUN=maketrans),type="b",lty="dashed",cex=1,xlim=c(0,max(design$time,na.rm=T)),ylim=c(min(phol,na.rm=T),1),main=main,xlab=xlab,ylab="ln(H/L+1)",...)
   if(peptide %in% row.names(object$hol.kloss)){
     for(s in samples){
+      if(is.na(object$hol.kloss[peptide,paste(s,"kloss",sep=".")])){next}
       abline(a=0,b=object$hol.kloss[peptide,paste(s,"kloss",sep=".")],lwd=2,col=unique(design$color[which(design$sample==s)]))
     }
   }
@@ -293,7 +299,9 @@ plotProteinHol <- function(object, protein, samples=NULL, peptides.alpha=150,plo
   plot(rep(object$design$time[w],nrow(phol)),as.numeric(t(phol)),col=sapply(rep(object$design$color,nrow(phol)),alpha=peptides.alpha,FUN=maketrans),pch=20,cex=1.5,xlim=c(0,max(object$design$time,na.rm=T)),ylim=c(0,max(phol,na.rm=T)),main=main,xlab=xlab,ylab="ln(H/L+1)")
   if(protein %in% row.names(object$protein.kloss)){
     for(s in samples){
-      abline(a=0,b=object$protein.kloss[protein,s],lwd=2,col=unique(design$color[which(design$sample==s)]))
+      abline(a=0,b=object$protein.kloss[row.names(object$protein.kloss) == protein, paste(s,"kloss",sep=".")],
+             lwd=2,
+             col=unique(design$color[which(design$sample==s)]))
     }
   }
   if(plot.legend)	legend("topleft",fill=object$design$color[!duplicated(object$design$sample) & object$design$sample %in% samples],legend=samples,bty="n")
@@ -343,7 +351,7 @@ kloss.heatmap <- function(object,protein,method="RIA"){
 #' @return Nothing, but plots a figure.
 #'
 #' @export
-kloss.boxplot <- function(object,protein,method="RIA",main=NULL,in.all=NULL,removeOutliers=NULL,normalize=F){
+kloss.boxplot <- function(object,protein,method="RIA",main=NULL,in.all=NULL,removeOutliers=NULL,normalize=FALSE){
   if(class(object) != "pSILAC")	stop("'object' should be a pSILAC object.")
   library(gplots)
   m2 <- paste(method,"kloss",sep=".")
@@ -352,19 +360,19 @@ kloss.boxplot <- function(object,protein,method="RIA",main=NULL,in.all=NULL,remo
     p <- intersect(row.names(getPeptides(object,protein=protein)),row.names(object[[m2]]))
     pd <- medianNorm(object[[m2]][,paste(unique(object$design$sample),"kloss",sep=".")])[p,]
   }else{
-    pd <- getPeptides(object,protein=protein,returnValues=m2)[,paste(unique(object$design$sample),"kloss",sep=".")]
+    pd <- getPeptides(object,protein=protein,returnValues=m2)[,paste(unique(object$design$sample),"kloss",sep="."), drop = FALSE]
   }
-  pd <- pd[which(apply(pd,1,FUN=function(x){ !all(is.na(x)) })),]
+  pd <- pd[which(apply(pd,1,FUN=function(x){ !all(is.na(x)) })), , drop = FALSE]
   colnames(pd) <- gsub(".kloss$","",colnames(pd))
   if(is.null(in.all))	in.all <- .getProtKParam(object, "in.all")
   if(in.all){
     nna <- apply(pd,1,FUN=function(x){ !any(is.na(x)) })
     if(sum(nna)>0 | in.all == 1){
-	pd <- pd[which(nna),]
+	pd <- pd[which(nna), , drop = FALSE]
     }
   }
   if(is.null(removeOutliers))	removeOutliers <- .getProtKParam(object, "removeOutliers")
-  if(removeOutliers & nrow(pd) > 2)	pd <- removeOutlierPeptides(pd, as.numeric(removeOutliers))
+  if(removeOutliers > 2 & nrow(pd) > 2)	pd <- removeOutlierPeptides(pd, min.size = as.numeric(removeOutliers))
   ll <- list()
   for(s in unique(object$design$sample)){
     ll[[s]] <- pd[,s]

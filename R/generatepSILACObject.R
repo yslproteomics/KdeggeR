@@ -264,7 +264,7 @@ generatepSILACObject <- function(dataset, design, inputDataType = "spectronaut",
       } else {
         e <- sapply(unique(nnames), FUN=function(x){ apply(e[, which(nnames == x)], 1, na.rm=T, FUN=aggregate.replicates) })
       }
-      e <- e[, o]
+      #e <- e[, o]
     }
   }
   

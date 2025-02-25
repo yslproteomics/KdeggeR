@@ -124,7 +124,7 @@ calcProteinsKloss <- function(o, method = "combined", ag.metric = "mean", ag.wei
     colnames(o$protein.kloss) <- paste(rep(unique(o$design$sample), each = 2), rep(c("kloss", "stderr"), length(unique(o$design$sample))), sep = ".")
   } else {
     o$protein.kloss <- as.data.frame(matrix(NA, nrow = length(unique(proteins)), ncol = length(unique(o$design$sample))), row.names = unique(proteins))
-    colnames(o$protein.kloss) <- unique(o$design$sample)
+    colnames(o$protein.kloss) <- paste(unique(o$design$sample), "kloss", sep = ".")
   }
   
   # Calculate aggregated k_loss for each protein
@@ -144,7 +144,7 @@ calcProteinsKloss <- function(o, method = "combined", ag.metric = "mean", ag.wei
   if (returnKlossTableOnly) return(o$protein.kloss)
   
   # Remove rows with all NA values
-  o$protein.kloss <- o$protein.kloss[which(apply(o$protein.kloss, 1, FUN = function(y) { !all(is.na(y)) })), ]
+  o$protein.kloss <- o$protein.kloss[which(apply(o$protein.kloss, 1, FUN = function(y) { !all(is.na(y)) })), , drop = FALSE]
   
   # Record method information in pSILAC object
   o$info$protk.method <- paste("Protein-level k_loss calculated through the", method, "method with", ag.metric, "of peptides", ifelse(ag.metric == "mean" & !is.null(ag.weights), paste("weighted by", ifelse(ag.weights == "both", "nbpoints/variance", ag.weights)), ""))
