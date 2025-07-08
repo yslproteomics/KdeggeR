@@ -10,7 +10,7 @@ See the vignette for detailed instructions and example code.
 
 The .pdf version of the vignette is provided [here](https://github.com/yslproteomics/KdeggeR/blob/main/inst/manual/KdeggerUserManual.pdf). 
 
-See the preprint for a more detailed description of the package's functions and applications: doi: https://doi.org/10.1101/2024.10.28.620709
+See the [KdeggeR paper](https://www.nature.com/articles/s41467-025-60319-x) for a more detailed description of the package's functions and applications. 
 
 ## Hardware Requirements
 
