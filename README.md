@@ -58,11 +58,9 @@ The installation takes about 30 seconds in a computer with the following specs: 
 
 ## How to Cite
 
-If you use the KdeggeR package in your work, please cite the following preprint. 
+If you use the KdeggeR package in your work, please cite the following publication. 
 
-A Comprehensive and Robust Multiplex-DIA Workflow Profiles Protein Turnover Regulations Associated with Cisplatin Resistance
-Barbora Salovska, Wenxue Li, Oliver M. Bernhardt, Pierre-Luc Germain, Tejas Gandhi, Lukas Reiter, Yansheng Liu
-bioRxiv 2024.10.28.620709; doi: https://doi.org/10.1101/2024.10.28.620709
+Salovska, B., Li, W., Bernhardt, O.M. et al. A robust multiplex-DIA workflow profiles protein turnover regulations associated with cisplatin resistance and aneuploidy. Nat Commun 16, 5034 (2025). https://doi.org/10.1038/s41467-025-60319-x
 
 
 ## Quick demo analysis guide
