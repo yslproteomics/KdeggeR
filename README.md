@@ -45,7 +45,7 @@ To install the package:
 
 ```{r}
 library("devtools")
-install_github("yslproteomics/KdeggeR", build_vignettes = TRUE)
+install_github("yslproteomics/KdeggeR", build_vignettes = TRUE, dependencies = TRUE)
 ```
 
 To open the vignette with detailed instructions and example code: 
