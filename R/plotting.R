@@ -459,10 +459,11 @@ plotIntensityDistribution <- function(o, channel = "light", ...) {
   
   # Select data based on channel
   dat <- switch(channel,
-                light = o$light,
-                heavy = o$heavy,
-                sum = .getChannelSum(o),
-                NLI = o$NLI)
+                light = as.data.frame(o$light),
+                heavy = as.data.frame(o$heavy),
+                sum   = as.data.frame(.getChannelSum(o)),
+                NLI   = as.data.frame(o$NLI)
+  )
   
   # Compute NLI if necessary
   if (is.null(dat)) dat <- normalizeLightChannel(o)$NLI
