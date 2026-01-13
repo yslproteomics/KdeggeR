@@ -1,3 +1,21 @@
+#'@title Example pSILAC dataset analyzed in MaxQuant
+#'
+#'@description This dataset contains a data.frame containing the first 5,000 unique peptides
+#' from a publicly available dataset (PXD057850) documented in the study of Frankenfield et al., MCP, 2025
+#' Benchmarking SILAC Proteomics Workflows and Data Analysis Platforms, PMID: 40315959 
+#' Result folder: MaxQuant_dSILAC_CurveFitting.zip, peptides.txt
+#' Contains one condition, measured in 4 time points and four replicates.  
+"example_maxquant"
+
+#'@title Example design table for a dataset analyzed in MaxQuant
+#'
+#'@description This dataset contains and example design table to run a pSILAC data analysis with replicate aggregation.
+#' Data from publicly available dataset (PXD057850) documented in the study of Frankenfield et al., MCP, 2025
+#' Benchmarking SILAC Proteomics Workflows and Data Analysis Platforms, PMID: 40315959 
+#' Result folder: MaxQuant_dSILAC_CurveFitting.zip, peptides.txt
+#' #' Contains one condition, measured in 4 time points and four replicates. 
+"example_maxquant_design"
+
 #'@title Example pSILAC dataset analyzed in Spectronaut 19
 #'
 #'@description This dataset contains a data.frame containing the first 20,000 unique precursors
