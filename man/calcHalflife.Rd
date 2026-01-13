@@ -7,13 +7,17 @@
 calcHalflife(o)
 }
 \arguments{
-\item{o}{A pSILAC object containing protein degradation data. The object must include `protein.kdeg` values, 
-which are required for halflife calculation. If these values are not available, run `calcKdeg()` first.}
+\item{o}{A pSILAC object containing protein degradation data. The object must include
+`protein.kdeg` values, which are required for halflife calculation. If these
+values are not available, run `calcKdeg()` first.}
 }
 \value{
-The modified pSILAC object with an added `protein.halflife` matrix, representing the calculated protein halflives.
+The modified pSILAC object with an added `protein.halflife` matrix,
+  representing the calculated protein halflives. Any kdeg values <= 0 are set
+  to NA prior to computing half-life.
 }
 \description{
-This function calculates the halflives of proteins based on their degradation rates (`kdeg` values) 
-from a pSILAC object. The calculated halflives are stored in the `prot.halflife` attribute of the object.
+This function calculates the halflives of proteins based on their degradation
+rates (`kdeg` values) from a pSILAC object. The calculated halflives are stored
+in the `protein.halflife` attribute of the object.
 }
