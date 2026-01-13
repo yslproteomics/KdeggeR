@@ -11,7 +11,7 @@ kloss.boxplot(
   main = NULL,
   in.all = NULL,
   removeOutliers = NULL,
-  normalize = F
+  normalize = FALSE
 )
 }
 \arguments{
