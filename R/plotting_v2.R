@@ -1515,8 +1515,16 @@ plotCorProtein <- function(o,
   )
   
   if (is.null(dat)) stop(paste0("'o$", slot_name, "' is NULL; no protein data available."))
-  if (ncol(dat) == 0L || nrow(dat) == 0L) stop(paste0("'o$", slot_name, "' has zero rows or columns."))
-  if (ncol(dat) == 1L) stop(paste0("'o$", slot_name, "' has only one sample."))
+  
+  # Exit gracefully if correlation cannot be computed
+  if (ncol(dat) == 0L || nrow(dat) == 0L) {
+    warning(paste0("'o$", slot_name, "' has zero rows or columns; correlation plot skipped."))
+    return(invisible(NULL))
+  }
+  if (ncol(dat) == 1L) {
+    warning(paste0("'o$", slot_name, "' has only one sample; correlation plot skipped."))
+    return(invisible(NULL))
+  }
   
   dat <- as.data.frame(dat)
   
