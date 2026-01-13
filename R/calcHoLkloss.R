@@ -14,8 +14,8 @@
 #' For each sample, the calculated metrics include the k_loss, its standard error, sum of squared residuals, and the number of points used in the calculation.
 #' A summary message is displayed for each sample, indicating the number of successfully calculated k_loss values and any missing values.
 #'
-#' @export
-calcHoLkloss <- function(o, ncores = NULL, tryRobust = FALSE) {
+#' @keywords internal
+.calcHoLkloss_v0 <- function(o, ncores = NULL, tryRobust = FALSE) {
   if (class(o) != "pSILAC") stop("o should be a pSILAC object.")
   
   o$hol.kloss <- NULL
@@ -75,7 +75,7 @@ calcHoLkloss <- function(o, ncores = NULL, tryRobust = FALSE) {
 #' A summary message is displayed for each sample, indicating the number of successfully calculated k_loss values and any missing values.
 #'
 #' @export
-calcHoLkloss_v2 <- function(o, ncores = NULL, tryRobust = FALSE) {
+calcHoLkloss <- function(o, ncores = NULL, tryRobust = FALSE) {
   if (!inherits(o, "pSILAC")) stop("o should be a pSILAC object.")
   
   o$hol.kloss <- NULL

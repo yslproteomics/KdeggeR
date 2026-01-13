@@ -27,8 +27,8 @@
 #' # Assuming `pSILAC_obj` is a valid pSILAC object with appropriate data
 #' filtered_pSILAC <- filterLinearRegression(pSILAC_obj, skip_time_point = 1)
 #'
-#' @export
-filterLinearRegression <- function(o, skip_time_point = 1, R2_cutoff = 0.9, p_cutoff = 0.05){
+#' @keywords internal
+.filterLinearRegression_v0 <- function(o, skip_time_point = 1, R2_cutoff = 0.9, p_cutoff = 0.05){
   
   if (class(o) != "pSILAC") stop("Input data should be a pSILAC object.")
   
@@ -104,7 +104,6 @@ filterLinearRegression <- function(o, skip_time_point = 1, R2_cutoff = 0.9, p_cu
 
 
 
-
 #' @title Filter Data Based on Linear Regression of ln(H/L + 1) Values
 #'
 #' @description Applies linear regression filtering to the ln(H/L + 1) data in a `pSILAC` object.
@@ -135,7 +134,7 @@ filterLinearRegression <- function(o, skip_time_point = 1, R2_cutoff = 0.9, p_cu
 #' filtered_pSILAC <- filterLinearRegression(pSILAC_obj, skip_time_point = 1)
 #'
 #' @export
-filterLinearRegression_v2 <- function(o, skip_time_point = 1,
+filterLinearRegression <- function(o, skip_time_point = 1,
                                       R2_cutoff = 0.9, p_cutoff = 0.05) {
   
   if (!inherits(o, "pSILAC")) stop("Input data should be a pSILAC object.")

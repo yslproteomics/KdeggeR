@@ -23,8 +23,8 @@
 #'
 #'
 #' @importFrom parallel makeCluster stopCluster detectCores parApply clusterExport
-#' @export
-calcRIAkloss <- function(o, ncores = NULL) {
+#' @keywords internal
+.calcRIAkloss_v0 <- function(o, ncores = NULL) {
   
   if (class(o) != "pSILAC") stop("o should be a pSILAC object.")
   o$RIA.kloss <- NULL
@@ -98,7 +98,7 @@ calcRIAkloss <- function(o, ncores = NULL) {
 #'
 #' @importFrom parallel makeCluster stopCluster detectCores parApply clusterExport
 #' @export
-calcRIAkloss_v2 <- function(o, ncores = NULL) {
+calcRIAkloss <- function(o, ncores = NULL) {
   
   if (!inherits(o, "pSILAC")) stop("o should be a pSILAC object.")
   o$RIA.kloss <- NULL

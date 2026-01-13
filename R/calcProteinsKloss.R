@@ -45,8 +45,8 @@
 #' @return If `returnKlossTableOnly` is `FALSE` (default), returns the updated `pSILAC` object with the added protein-level k_loss table.
 #'   If `returnKlossTableOnly` is `TRUE`, returns only the protein k_loss table as a data frame.
 #'
-#' @export
-calcProteinsKloss <- function(o, method = "combined", ag.metric = "mean", ag.weights = "both", unique.weights = TRUE, in.all = 2, removeOutliers = 5, ncores = NULL, tryRobust = FALSE, returnKlossTableOnly = FALSE, returnSD = FALSE) {
+#' @keywords internal
+.calcProteinsKloss_v0 <- function(o, method = "combined", ag.metric = "mean", ag.weights = "both", unique.weights = TRUE, in.all = 2, removeOutliers = 5, ncores = NULL, tryRobust = FALSE, returnKlossTableOnly = FALSE, returnSD = FALSE) {
   # Check if the input is a valid pSILAC object
   if (class(o) != "pSILAC") stop("o should be a pSILAC object.")
   
@@ -201,7 +201,7 @@ calcProteinsKloss <- function(o, method = "combined", ag.metric = "mean", ag.wei
 #'   If `returnKlossTableOnly` is `TRUE`, returns only the protein k_loss table as a data frame.
 #'
 #' @export
-calcProteinsKloss_v2 <- function(o, method = "combined", ag.metric = "mean", ag.weights = "both",
+calcProteinsKloss <- function(o, method = "combined", ag.metric = "mean", ag.weights = "both",
                               unique.weights = TRUE, in.all = 2, removeOutliers = 5, ncores = NULL,
                               tryRobust = FALSE, returnKlossTableOnly = FALSE, returnSD = FALSE) {
   # Check if the input is a valid pSILAC object

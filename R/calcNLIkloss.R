@@ -22,9 +22,8 @@
 #'   \item \code{nbpoints} - Number of points used in the fitting.
 #' }
 #'
-#' @export
-#'
-calcNLIkloss <- function(o, startIntensity = "max", ncores = NULL) {
+#' @keywords internal
+.calcNLIkloss_v0 <- function(o, startIntensity = "max", ncores = NULL) {
   
   if (class(o) != "pSILAC") stop("o should be a pSILAC object.")
   
@@ -153,8 +152,7 @@ calcNLIkloss <- function(o, startIntensity = "max", ncores = NULL) {
 #' }
 #'
 #' @export
-#'
-calcNLIkloss_v2 <- function(o, startIntensity = "max", ncores = NULL) {
+calcNLIkloss <- function(o, startIntensity = "max", ncores = NULL) {
   
   if (!inherits(o, "pSILAC")) stop("o should be a pSILAC object.")
   

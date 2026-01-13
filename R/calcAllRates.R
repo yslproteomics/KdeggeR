@@ -28,8 +28,8 @@
 #'   \item Protein-level k_loss rates are calculated using the specified aggregation settings via `calcProteinsKloss`.
 #' }
 #'
-#' @export
-calcAllRates <- function(o, method = "combined", ag.metric = "mean", ag.weights = "variance", in.all = 2, ncores = 1, tryRobust = FALSE, startIntensity = "max") {
+#' @keywords internal
+.calcAllRates_v0 <- function(o, method = "combined", ag.metric = "mean", ag.weights = "variance", in.all = 2, ncores = 1, tryRobust = FALSE, startIntensity = "max") {
   if (class(o) != "pSILAC") stop("o should be a pSILAC object.")
   
   message("Calculating peptide-wise k_loss using the RIA-based method...")
@@ -81,17 +81,17 @@ calcAllRates <- function(o, method = "combined", ag.metric = "mean", ag.weights 
 #' }
 #'
 #' @export
-calcAllRates_v2 <- function(o, method = "combined", ag.metric = "mean", ag.weights = "variance", in.all = 2, ncores = 1, tryRobust = FALSE, startIntensity = "max") {
+calcAllRates <- function(o, method = "combined", ag.metric = "mean", ag.weights = "variance", in.all = 2, ncores = 1, tryRobust = FALSE, startIntensity = "max") {
   if (class(o) != "pSILAC") stop("o should be a pSILAC object.")
   
   message("Calculating peptide-wise k_loss using the RIA-based method...")
-  o <- calcRIAkloss_v2(o)
+  o <- calcRIAkloss(o)
   
   message("Calculating peptide-wise k_loss using the ln(H/L+1)-based method...")
-  o <- calcHoLkloss_v2(o)
+  o <- calcHoLkloss(o)
   
   message("Calculating peptide-wise k_loss using the normalized light channel...")
-  o <- calcNLIkloss_v2(o)
+  o <- calcNLIkloss(o)
   
   message("Calculating protein-wise k_loss using specified aggregation method...")
   o <- calcProteinsKloss(o, method, ag.metric, ag.weights, in.all)
