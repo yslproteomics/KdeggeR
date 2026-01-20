@@ -46,7 +46,7 @@ install.packages("MASS")
 
 ```{r install KdeggeR, eval = FALSE}
 library("devtools")
-install_github("yslproteomics/KdeggeR", build_vignettes = TRUE)
+install_github("yslproteomics/KdeggeR", build_vignettes = TRUE, dependencies = TRUE)
 ```
 
 ## Open the vignette
@@ -69,11 +69,11 @@ library(KdeggeR)
 
 ## Data
   - The data can be either provided as a path to the file or can be a data.frame already loaded in the R environment.
-  - The data must contain light and heavy intensity columns, a protein id column, and a precursor id column. Other columns are optional. 
+  - The data must contain light and heavy intensity columns, a protein id column, and a precursor id column. Other columns are optional. Currently, KdeggeR requires peptide (MaxQuant) or precursor-level data (Spectronaut, DIA-NN, FragPipe). 
   - If the data has been pre-loaded in the R environment, the data must have row names corresponding to precursor ids.
   - See examples in the code chunks below. 
 
-### Spectronaut data, labeled workflow
+### Spectronaut data, Labeled workflow
   - Required columns: `PG.ProteinGroups`, `EG.PrecursorId`
   - Light intensities: columns ending with `EG.Channel1Quantity`
   - Heavy intensities: columns ending with `EG.Channel2Quantity`
@@ -85,7 +85,7 @@ KdeggeR::example_spectronaut %>%
 ```
  
 ### Spectronaut data, ISW workflow 
-  - In SN19, the same columns can be exported and use
+  - In SN19, the same columns can be exported and used
   - In older SN versions: 
     - The light channel quantities are named as `EG.ReferenceQuantity`
     - The heavy channel quantities are named `EG.TargetQuantity`
@@ -93,12 +93,13 @@ KdeggeR::example_spectronaut %>%
 
 ```{r example data isw, eval = FALSE}
 KdeggeR::example_spectronaut_isw %>%
-  dplyr::rename_with(~gsub("EG.TargetQuantity..Settings.", "EG.Channel2Quantity", .), .cols = dplyr::ends_with("EG.TargetQuantity..Settings.")) %>%
-  dplyr::rename_with(~gsub("EG.ReferenceQuantity..Settings.", "EG.Channel1Quantity", .), .cols = dplyr::ends_with("EG.ReferenceQuantity..Settings."))
+  dplyr::rename_with(~gsub("EG.TargetQuantity..Settings.", "EG.Channel2Quantity", .), 
+                     .cols = dplyr::ends_with("EG.TargetQuantity..Settings.")) %>%
+  dplyr::rename_with(~gsub("EG.ReferenceQuantity..Settings.", "EG.Channel1Quantity", .), 
+                     .cols = dplyr::ends_with("EG.ReferenceQuantity..Settings."))
 ```
 
-### DIA-NN and Fragpipe data, plexDIA
-  - Recommended output: 
+### DIA-NN and FragPipe data, plexDIA
   - Required columns: `Protein.Group`, `Precursor.Id`
   - Light intensities: columns ending with `.L`
   - Heavy intensities: columns ending with `.H`
@@ -107,6 +108,20 @@ KdeggeR::example_spectronaut_isw %>%
 ```{r example data dia_nn, eval = FALSE}
 KdeggeR::example_diann %>%
   dplyr::glimpse()
+```
+
+### MaxQuant data, DDA
+  - Input file: `peptides.txt` 
+  - Currently, for MaxQuant KdeggeR does not support direct import of the .txt file; the data.frame must be loaded in the environment
+  - The Sequence column must be set as row names
+  - Required protein id column: Proteins
+  - Light intensities: columns starting with `Intensity.L.`
+  - Heavy intensities: columns starting with `Intensity.H`
+  - Example data are provided, see `KdeggeR::example_maxquant` to check the expected data structure
+
+```{r example data maxquant, eval = FALSE}
+KdeggeR::example_maxquant %>%
+  dplyr::glimpse() 
 ```
 
 ## Design table
@@ -143,7 +158,7 @@ row.names(KdeggeR::example_spectronaut_design)
 Note, if replicate design is used, the data will be combined in the beginning of the processing, and all subsequent steps are performed with the averaged data (such as RIA calculation, data filtering, kloss modeling, etc..). 
 
 ```{r example design lbl replicates, eval = FALSE}
-# Examine the data structure
+# Examine the data structure, Spectronaut
 KdeggeR::example_spectronaut_design_replicates %>%
   dplyr::glimpse()
 
@@ -151,25 +166,49 @@ KdeggeR::example_spectronaut_design_replicates %>%
 row.names(KdeggeR::example_spectronaut_design_replicates)
 ```
 
-### Generate design table based on the results file
+### Design table for DIA-NN 
+  - The example file provided contains data without replicate design (datastes with replicate design are also supported)
+
+```{r example design diann, eval = FALSE}
+# Examine the data structure
+KdeggeR::example_maxquant_design %>%
+  dplyr::glimpse()
+```
+
+### Design table for MaxQuant
+  - The example file provided contains data in replicate design (datastes without replicate design are also supported)
+  - The row names contain LC-MS run names as specified in MaxQuant (can be extracted from the Intensity.L.sample_xyz columns as sample_xyz)
+
+```{r example design mq replicate, eval = FALSE}
+# Examine the data structure
+KdeggeR::example_maxquant_design %>%
+  dplyr::glimpse()
+```
+
+### Automatically generate template design table
 
   - The `generate_design_template()` function can be used to generate a customizable design table template based on the data file. 
   - In this case, a path to the data file must be provided - example tsv files are provided in the data directory. 
   - A tsv file is exported, which can be customized by the user, saved as a .tsv file and used as an input for the `generatepSILACObject()` function.
+  - This function is not available for MaxQuant output.
   
 ```{r generate design table, eval = FALSE}
 # use path to the file
-input_data <- paste(.libPaths()[1], "KdeggeR/data_tsv/example_data_pSILAC_SN19.tsv", sep = "/")
+input_data <- paste(.libPaths()[1], 
+                    "KdeggeR/data_tsv/example_data_pSILAC_SN19.tsv", 
+                    sep = "/")
 
 KdeggeR::generateDesignTemplate(dataset = input_data, inputDataType = "spectronaut")
 
 # use path to the file
-input_data <- paste(.libPaths()[1], "KdeggeR/data_tsv/example_data_pSILAC_diann_1,9.tsv", sep = "/")
+input_data <- paste(.libPaths()[1], 
+                    "KdeggeR/data_tsv/example_data_pSILAC_diann_1,9.tsv", 
+                    sep = "/")
 
 KdeggeR::generateDesignTemplate(dataset = input_data, inputDataType = "diann")
 ```
 
-## kcd table
+## Cell division rate (kcd) table
 
   - A simple kcd table with two columns can be provided to be used for kdeg calculation. 
   - The table must contain a `sample` column identical to the `sample` column in the design table, and a `kcd` column containing experimentally-derived cell doubling rates. 
@@ -181,7 +220,6 @@ KdeggeR::example_kcd %>%
 ```
 
 # Generate pSILAC object
-
 ## Function description
 
 The pSILAC object is generated using the design table and the data using the `generatepSILACobject()` function. The function prepares the R object, filters and/or averages the intensity data, and calculates the RIA(Light), ln(H/L + 1), and NLI values, which are then used for downstream processing.  
@@ -201,10 +239,13 @@ The `requant` and `inpute.method` parameters are only relevant when working with
 See `?generatepSILACObject` for a full documentation. 
 
 ## Examples
-
-### Spectronaut 19 example without replicate design
+### Spectronaut 19, without replicate aggregation (recommended for biological replicates)
 
   - Use example data provided in the KdeggeR package. 
+  - This analysis is generally recommended for experiments with biological replicates, and when the replicates will be used for downstream analysis, e.g. statistical analysis. 
+  - When using this option, all replicates will be filtered and processed independently.
+  - The output will contain kdeg values for each replicate.
+  - See the data structure of the example data provided in the KdeggeR package.  
 
 ```{r generate pSILAC object Spectronaut in R without replicates, eval = FALSE}
 input_data <- KdeggeR::example_spectronaut
@@ -213,7 +254,7 @@ input_design <- KdeggeR::example_spectronaut_design
 pSILAC_object <- KdeggeR::generatepSILACObject(dataset = input_data, 
                                    design = input_design, 
                                    inputDataType = "spectronaut",
-                                   aggregate.replicates = NA, # if NA, replicates are not aggregated
+                                   aggregate.replicates = NA, # replicates not aggregated
                                    filterPeptides = T, 
                                    ncores = NULL,
                                    noiseCutoff = 8)
@@ -222,11 +263,13 @@ pSILAC_object$info
 pSILAC_object$design
 ```
 
-### Spectronaut 19 example with replicate aggregation
+### Spectronaut 19, with replicate aggregation(recommended for technical replicates)
 
   - Use example data provided in the KdeggeR package. 
-  - The replicates will be averaged during the pSILAC object generation. 
-  - This design is advisable when processing experiments with, e.g., replicate injections or dish replicates. 
+  - This analysis is generally recommended for experiments with technical replicates.
+  - The replicates will be averaged during the pSILAC object generation, and the averaged data will be further filtered and processed.
+  - The output will contain kdeg values for each condition. 
+  - See the data structure of the example data provided in the KdeggeR package.
 
 ```{r generate pSILAC object Spectronaut in R with replicates, eval = FALSE}
 input_data <- KdeggeR::example_spectronaut
@@ -235,7 +278,7 @@ input_design <- KdeggeR::example_spectronaut_design_replicates
 pSILAC_object <- KdeggeR::generatepSILACObject(dataset = input_data, 
                                    design = input_design, 
                                    inputDataType = "spectronaut",
-                                   aggregate.replicates = "mean", # can be "mean" or "median"
+                                   aggregate.replicates = "mean", # or "median"
                                    filterPeptides = T, 
                                    ncores = NULL,
                                    noiseCutoff = 8)
@@ -244,37 +287,43 @@ pSILAC_object$info
 pSILAC_object$design
 ```
 
-### Spectronaut 19 example, use filepath
+### Spectronaut 19, use filepath to load the data
 
   - The files are provided in the inst/data_tsv directory via the GitHub repository. 
   - The function will load the files using the provided paths and process the data. 
 
 ```{r generate pSILAC object using file path, eval = FALSE}
 # design without replicates
-input_data <- paste(.libPaths()[1], "KdeggeR/data_tsv/example_data_pSILAC_SN19.tsv", sep = "/")
-input_design <- paste(.libPaths()[1], "KdeggeR/data_tsv/example_design_table_pSILAC_SN19_no_replicates.txt", sep = "/")
+input_data <- paste(.libPaths()[1], 
+                    "KdeggeR/data_tsv/example_data_pSILAC_SN19.tsv", 
+                    sep = "/")
+input_design <- paste(.libPaths()[1], 
+                      "KdeggeR/data_tsv/example_design_table_pSILAC_SN19_no_replicates.txt", 
+                      sep = "/")
 
 pSILAC_object <- KdeggeR::generatepSILACObject(dataset = input_data, 
                                    design = input_design, 
-                                   inputDataType = "spectronaut", # inputDataType needs to be correctly specified
-                                   aggregate.replicates = NA, # if NA, replicates are not aggregated
+                                   inputDataType = "spectronaut", # needs to be specified
+                                   aggregate.replicates = NA, # replicates not aggregated
                                    filterPeptides = T, 
                                    ncores = NULL,
                                    noiseCutoff = 8)
 
 # design with replicates
-input_design <- paste(.libPaths()[1], "KdeggeR/data_tsv/example_design_table_pSILAC_SN19_replicates.txt", sep = "/")
+input_design <- paste(.libPaths()[1], 
+                      "KdeggeR/data_tsv/example_design_table_pSILAC_SN19_replicates.txt", 
+                      sep = "/")
 
 pSILAC_object <- KdeggeR::generatepSILACObject(dataset = input_data, 
                                    design = input_design, 
-                                   inputDataType = "spectronaut", # inputDataType needs to be correctly specified
-                                   aggregate.replicates = "mean", # can be "mean" or "median" 
+                                   inputDataType = "spectronaut", # needs to be specified
+                                   aggregate.replicates = "mean", # or "median" 
                                    filterPeptides = T, 
                                    ncores = NULL,
                                    noiseCutoff = 8)
 ```
 
-### DIA-NN 1.9 example
+### DIA-NN 1.9
 
   - Use example data provided in the KdeggeR package. 
 
@@ -285,7 +334,7 @@ input_design <- KdeggeR::example_diann_design
 pSILAC_object <- KdeggeR::generatepSILACObject(dataset = input_data, 
                                    design = input_design, 
                                    inputDataType = "diann",
-                                   aggregate.replicates = NA, # if NA, replicates are not aggregated
+                                   aggregate.replicates = NA,
                                    filterPeptides = T, 
                                    ncores = NULL,
                                    noiseCutoff = 8)
@@ -294,23 +343,48 @@ pSILAC_object$info
 pSILAC_object$design
 ```
 
-### DIA-NN 1.9, use filepath
+### DIA-NN 1.9, use filepath to load the data
 
   - The files are provided in the inst/data_tsv directory via the GitHub repository. 
   - The function will load the files using the provided paths and process the data. 
 
 ```{r generate pSILAC object diann file path, eval = FALSE}
 # design without replicates
-input_data <- paste(.libPaths()[1], "KdeggeR/data_tsv/example_data_pSILAC_diann_1,9.tsv", sep = "/")
-input_design <- paste(.libPaths()[1], "KdeggeR/data_tsv/example_design_table_pSILAC_diann_1,9.tsv", sep = "/")
+input_data <- paste(.libPaths()[1],
+                    "KdeggeR/data_tsv/example_data_pSILAC_diann_1,9.tsv", 
+                    sep = "/")
+input_design <- paste(.libPaths()[1],
+                      "KdeggeR/data_tsv/example_design_table_pSILAC_diann_1,9.tsv",
+                      sep = "/")
 
 pSILAC_object <- KdeggeR::generatepSILACObject(dataset = input_data, 
                                    design = input_design, 
-                                   inputDataType = "diann", # inputDataType needs to be correctly specified
-                                   aggregate.replicates = NA, # if NA, replicates are not aggregated
+                                   inputDataType = "diann", 
+                                   aggregate.replicates = NA, 
                                    filterPeptides = T, 
                                    ncores = NULL,
                                    noiseCutoff = 8)
+```
+
+### MaxQuant
+  - This dataset contains a data.frame containing the first 5,000 unique peptides from a publicly available dataset (PXD057850) documented in the study of     Frankenfield et al., MCP, 2025. Benchmarking SILAC Proteomics Workflows and Data Analysis Platforms, PMID: 40315959. 
+  - Result folder: MaxQuant_dSILAC_CurveFitting.zip, peptides.txt
+  - Contains one condition, measured in 4 time points and four technical replicates.
+
+```{r generate pSILAC object mq in R with replicates, eval = FALSE}
+input_data <- KdeggeR::example_maxquant
+input_design <- KdeggeR::example_maxquant_design
+
+pSILAC_object <- KdeggeR::generatepSILACObject(dataset = input_data, 
+                                   design = input_design, 
+                                   inputDataType = "maxquant",
+                                   aggregate.replicates = "mean", # or "median"
+                                   filterPeptides = T, 
+                                   ncores = NULL,
+                                   noiseCutoff = 8)
+
+pSILAC_object$info
+pSILAC_object$design
 ```
 
 # Filter data
@@ -328,14 +402,18 @@ To do so, we replace by NA all values in time point 1, which do not follow the e
   - Filter based on valid values, skip the first time point (preferable for the example dataset). 
   
 ```{r filter valid values skip time point 1, eval = FALSE}
-pSILAC_object <- KdeggeR::filterValidValues(pSILAC_object, values_cutoff = 2, skip_time_point = 1)
+pSILAC_object <- KdeggeR::filterValidValues(pSILAC_object, 
+                                            values_cutoff = 2, 
+                                            skip_time_point = 1)
 ```
 
   - Filter based on valid values, at least 3 values requested in a time-series. 
   
 ```{r filter valid values, eval = FALSE}
 # example code, does not modify the pSILAC object
-KdeggeR::filterValidValues(pSILAC_object, values_cutoff = 3, skip_time_point = 0)
+KdeggeR::filterValidValues(pSILAC_object, 
+                           values_cutoff = 3, 
+                           skip_time_point = 0)
 ```
 
 ## Filter based on monotone trend
@@ -344,7 +422,9 @@ KdeggeR::filterValidValues(pSILAC_object, values_cutoff = 3, skip_time_point = 0
   - Replaces values in time point 1, which do not follow the expected trend considering the next time point available. 
 
 ```{r filter monotone trend skip time point 1, eval = FALSE}
-pSILAC_object <- KdeggeR::filterMonotone(pSILAC_object, skip_time_point = 1)
+pSILAC_object <- KdeggeR::filterMonotone(pSILAC_object, 
+                                         skip_time_point = 1)
+
 pSILAC_object <- KdeggeR::filterMonotoneTimePoint1(pSILAC_object)
 ```
 
@@ -352,7 +432,8 @@ pSILAC_object <- KdeggeR::filterMonotoneTimePoint1(pSILAC_object)
 
 ```{r filter monotone trend, eval = FALSE}
 # example code, does not modify the pSILAC object
-KdeggeR::filterMonotone(pSILAC_object, skip_time_point = 0)
+KdeggeR::filterMonotone(pSILAC_object, 
+                        skip_time_point = 0)
 ```
 
 ## Filter based on linear regression
@@ -361,7 +442,10 @@ KdeggeR::filterMonotone(pSILAC_object, skip_time_point = 0)
   - Time point 1 values with a Grubbs' test P value lower than a selected threshold (`p_cutoff`) and corresponding to curves with an R2 lower than selected threshold (`R2_cutoff`) will be replaced by NA in both ln(H/L + 1) data and RIA data. 
   
 ```{r filter linear regression, eval = FALSE}
-pSILAC_object <- KdeggeR::filterLinearRegression(pSILAC_object, skip_time_point = 1, R2_cutoff = 0.9, p_cutoff = 0.05)
+pSILAC_object <- KdeggeR::filterLinearRegression(pSILAC_object, 
+                                                 skip_time_point = 1, 
+                                                 R2_cutoff = 0.9, 
+                                                 p_cutoff = 0.05)
 ```
 
 # Fit models to estimate k_loss
@@ -379,7 +463,8 @@ The value of RIAt changes over time as unlabeled proteins are gradually replaced
 Where RIA0 denotes the initial isotopic ratio and kloss the rate of loss of unlabeled protein. We assumed RIA0 = 1, as no heavy isotope was present at t = 0, thus the value of RIAt will decay exponentially from 1 to 0 after infinite time and used nonlinear least‐squares estimation to perform the fit. As discussed before, these assumptions may reduce measurement error, especially at the beginning of the experiment, where isotopic ratios are less accurate. 
 
 ```{r fit precursor RIA k_loss, eval = FALSE}
-pSILAC_object <- KdeggeR::calcRIAkloss(pSILAC_object, ncores = NULL)
+pSILAC_object <- KdeggeR::calcRIAkloss(pSILAC_object, 
+                                       ncores = NULL)
 ```
 
 ## The NLI method
@@ -391,7 +476,9 @@ Then, the light precursor rate of loss can be modeled using the same model and a
 If the data are already filtered, the `startIntensity` of `max` can be used for the modeling, as the intensity in the first measured time point is the maximum one. Other options are available and might be used for unfiltered data, such as `median` or  `model`, see the function documentation.  
 
 ```{r fit precursor NLI k_loss, eval = FALSE}
-pSILAC_object <- KdeggeR::calcNLIkloss(pSILAC_object, startIntensity = "max", ncores = NULL)
+pSILAC_object <- KdeggeR::calcNLIkloss(pSILAC_object, 
+                                       startIntensity = "max", 
+                                       ncores = NULL)
 ```
 
 ## The H/L method
@@ -403,7 +490,9 @@ The heavy proteins are synthesized over time, leading to an increasing H/L ratio
 In the steady-state condition, the rates of protein synthesis and degradation reach equilibrium. This means that the rate at which new heavy-labeled proteins are synthesized must be balanced by the rate at which proteins are degraded or turned over (kloss).
 
 ```{r fit precursor HOL k_loss, eval = FALSE}
-pSILAC_object <- KdeggeR::calcHoLkloss(pSILAC_object, tryRobust = FALSE, ncores = NULL)
+pSILAC_object <- KdeggeR::calcHoLkloss(pSILAC_object, 
+                                       tryRobust = FALSE, 
+                                       ncores = NULL)
 ```
 
 # Calculate protein k_loss
@@ -425,7 +514,7 @@ pSILAC_object <- KdeggeR::calcProteinsKloss(pSILAC_object, method = "complement"
                        ag.metric = "mean", 
                        ag.weights = "both", 
                        ncores = NULL, 
-                       returnKlossTableOnly = F, # the data will be saved in the pSILAC object
+                       returnKlossTableOnly = F,
                        returnSD = F )
 ```
 
@@ -438,7 +527,7 @@ prot_kloss <- KdeggeR::calcProteinsKloss(pSILAC_object, method = "RIA",
                        ag.metric = "mean", 
                        ag.weights = "both", 
                        ncores = 1, 
-                       returnKlossTableOnly = T, 
+                       returnKlossTableOnly = T, # export protein k_loss df
                        returnSD = T )
 ```
 
@@ -449,9 +538,10 @@ The `calcAllRates()` function is a wrapper function that calc the individual fun
 Then it aggregates the precursor-level estimates into protein k_loss estimates using the selected method. It accepts the same parameters as the functions above. 
 
 ```{r fit all rates, eval = FALSE}
-pSILAC_object <- KdeggeR::calcAllRates(pSILAC_object, method = "complement", 
-                  ag.metric = "mean", 
-                  ag.weights = "both")
+pSILAC_object <- KdeggeR::calcAllRates(pSILAC_object, 
+                                       method = "complement", 
+                                       ag.metric = "mean", 
+                                       ag.weights = "both")
 ```
 
 # Calculate k_deg and t_1/2
@@ -470,9 +560,7 @@ Optionally, protein half-lives from the degradation rate constant using the foll
 ## Import experimentally-determined kcd values
 
 ```{r example kcd, eval = FALSE}
-input_kcd <- KdeggeR::example_kcd %>%
-  dplyr::filter(sample %in% c("Cis_1", "Nor_1")) %>%
-  dplyr::mutate(sample = gsub("_1", "", sample))
+input_kcd <- KdeggeR::example_kcd
 ```
 
 ## Calculate kdeg using kcd
@@ -480,7 +568,9 @@ input_kcd <- KdeggeR::example_kcd %>%
 To use the experimentally-derived `kcd` value  set the `type` parameter to `kcd` and provide a data.frame with the k_cd values using the `rate_df` parameter.
 
 ```{r calculate k_deg using kcd, eval = FALSE}
-pSILAC_object <- KdeggeR::calcKdeg(pSILAC_object, rate_df = input_kcd, type = "kcd")
+pSILAC_object <- KdeggeR::calcKdeg(pSILAC_object, 
+                                   rate_df = input_kcd, 
+                                   type = "kcd")
 ```
 
 ## Calculate kdeg using kperc
@@ -488,7 +578,10 @@ pSILAC_object <- KdeggeR::calcKdeg(pSILAC_object, rate_df = input_kcd, type = "k
 To use the theoretical `kperc` value  set the `type` parameter to `kperc`. The percentage of negative k_deg values after the k_perc subtraction can be set using the `perc_neg` parameter. Based on our experience, setting this paramater to a value between 0.01 and 0.05 performs the best, and we also observed such as percentage of negative k_deg values when we subtracted the experimentally-derived k_cd values. 
 
 ```{r calculate k_deg using kperc, eval = FALSE}
-pSILAC_object <- KdeggeR::calcKdeg(pSILAC_object, rate_df = NULL, type = "kperc", perc_neg = 0.01)
+pSILAC_object <- KdeggeR::calcKdeg(pSILAC_object, 
+                                   rate_df = NULL, 
+                                   type = "kperc", 
+                                   perc_neg = 0.01)
 ```
 
 ## Calculate t(1/2)
@@ -499,43 +592,131 @@ The halflives are calculated using the formula described above.
 pSILAC_object <- KdeggeR::calcHalflife(pSILAC_object)
 ```
 
-# Visulize Results
+# Visualize
 
 ## Precursor/peptide
 
-Plot the peptide-level fit of a selected peptide. The colors can be specified in the design table and customized by modifing the design data.frame of the pSILAC object.
-
-### Plot precursor RIA model
+### Valid values across samples & time points
+The `plotValidValuesPeptide` function creates a bar plot showing the number of non-missing values in the selected channel per sample and time point. The channel is specified using the `method` argument with the following options: `light`, `heavy`, `RIA`, `hol`, or `NLI`. 
 
 ```{r, eval = FALSE}
+KdeggeR::plotValidValuesPeptide(pSILAC_object, 
+                                 method = "light", 
+                                 c = "lightblue")
+```
+
+### Data distribution across samples & time points
+The `plotDistributionPeptide` function creates box plots showing the data distribution of the selected channel per sample and time point. The channel is specified using the `method` argument with the following options: `light`, `heavy`, `RIA`, `hol`, or `NLI`. 
+
+```{r, eval = FALSE}
+KdeggeR::plotDistributionPeptide(pSILAC_object, 
+                                 method = "light", 
+                                 c = "lightblue")
+```
+
+### Kloss distribution across samples
+The `plotDistributionKlossPeptide` function creates box plots showing the distribution of the results of the selected kloss calculation method per sample. The method is specified using the `method` argument with the following options: `RIA`, `hol`, or `NLI`. 
+
+```{r, eval = FALSE}
+KdeggeR::plotDistributionKlossPeptide(pSILAC_object, 
+                                 method = "RIA", 
+                                 c = "lightblue")
+```
+
+### Plot kloss fitting QC
+The `plotQCklossPeptide` function creates diagnostic QC plots for peptide-level k_loss fitting. For continuous metrics, the function generates violin plots with a median line per sample. The method is specified using the `method` argument with the following options: `RIA`, `hol`, or `NLI`. The `metric` argument takes the following options: `kloss.stderr`, `kloss.SSR`, or `R2` (available for the `hol` method only). 
+
+The `plotQCklossPeptideNbpoints` function creates a 100 percent stacked bar plot showing, for each sample, the proportion of peptides fitted with each discrete number of data points value. The method is specified using the `method` argument with the following options: `RIA`, `hol`, or `NLI`.
+
+The `plotQCklossPeptideR2Binned` function creates a 100 percent stacked bar plot showing, for each sample, the proportion of peptides falling into R2 quality bins. This function plot by default the R2 values estimated using the `hol` method. 
+
+```{r, eval = FALSE}
+KdeggeR::plotQCklossPeptide(pSILAC_object, 
+                                 method = "RIA",  
+                                 metric = "kloss.stderr")
+
+
+KdeggeR::plotQCklossPeptideNbpoints(pSILAC_object, 
+                                 method = "RIA")
+
+KdeggeR::plotQCklossPeptideR2Binned(pSILAC_object)
+```
+
+### Plot selected precursor RIA model
+The function `plotPeptideRIA` plots the peptide-level fit of a selected peptide. The colors can be specified in the design table and customized by modifing the design data.frame of the pSILAC object.
+
+```{r, eval = FALSE}
+# Get precursors/peptide from the peptide table
 pSILAC_object$peptides %>%
   dplyr::slice_head(n = 10) %>%
   dplyr::glimpse()
 
 # Spectronaut example
-KdeggeR::plotPeptideRIA(pSILAC_object, peptide = "_MLIPYIEHWPR_.3")
+KdeggeR::plotPeptideRIA(pSILAC_object, 
+                        peptide = "_MLIPYIEHWPR_.3")
 ```
 
-### Plot precursor ln(H/L +1) model
+### Plot selected precursor ln(H/L +1) model
+The function `plotPeptideHoL` plots the peptide-level fit of a selected peptide. The colors can be specified in the design table and customized by modifing the design data.frame of the pSILAC object.
 
 ```{r, eval = FALSE}
-KdeggeR::plotPeptideHoL(pSILAC_object, peptide = "_MLIPYIEHWPR_.3")
+KdeggeR::plotPeptideHoL(pSILAC_object, 
+                        peptide = "_MLIPYIEHWPR_.3")
 ```
 
 ## Protein
 
-Plot protein-level k_loss fit and all precursor-level datapoints. 
-
-### Plot protein RIA
+### Valid values across samples & time points
+The `plotValidValuesProtein` functions aggregates precursor-level values to the protein level by taking the median across peptides per protein and sample and creates a bar plot showing the number of non-missing values in the selected channel per sample. The channel is specified using the `method` argument with the following options: `RIA`, `hol`, or `NLI`. 
 
 ```{r, eval = FALSE}
-KdeggeR::plotProteinRIA(pSILAC_object, protein = "O75208")
+KdeggeR::plotValidValuesProtein(pSILAC_object, 
+                                 method = "RIA", 
+                                 c = "lightblue")
 ```
 
-### Plot protein HoL
+### Data distribution across samples & time points
+The `plotDistributionProtein` functions aggregates precursor-level values to the protein level by taking the median across peptides per protein and sample and creates boxplots showing the data distribution of the selected channel per sample. The channel is specified using the `method` argument with the following options: `RIA`, `hol`, or `NLI`. 
 
 ```{r, eval = FALSE}
-KdeggeR::plotProteinHol(pSILAC_object, protein = "O75208")
+KdeggeR::plotDistributionProtein(pSILAC_object, 
+                                 method = "RIA", 
+                                 c = "lightblue")
+```
+
+### Kloss distribution across samples
+The `plotDistributionKlossProtein` function creates box plots showing the distribution of the protein-level kloss calculation results.
+
+```{r, eval = FALSE}
+KdeggeR::plotDistributionKlossProtein(pSILAC_object, 
+                                 c = "lightblue")
+```
+
+### Protein degradation rate distribution
+The `plotDistributionKdegProtein` function creates box plots showing the distribution of the protein degradation rate (kdeg) calculation results.
+
+```{r, eval = FALSE}
+KdeggeR::plotDistributionKdegProtein(pSILAC_object
+                                 c = "lightblue")
+```
+
+### Protein half-life distribution
+The `plotDistributionHalflifeProtein` function creates box plots showing the distribution of the protein half-life (t1/2) calculation results.
+
+```{r, eval = FALSE}
+KdeggeR::plotDistributionHalflifeProtein(pSILAC_object
+                                 c = "lightblue")
+```
+
+### Sample correlation matrix
+
+The `plotCorProtein` function computes a correlation matrix of protein-level turnover metrics across samples and visualizes it using the `corrplot` package. The `metric` argument takes the following options: `kloss`, `kdeg`, `halflife`. The `method` argument takes the method passed to the cor() function, e.g., `spearman` or `pearson`. The `use` argument takes the missing values handling method passed to to the cor() function, e.g., `pairwise.complete.obs` or `complete.obs`. 
+
+```{r, eval = FALSE}
+KdeggeR::plotCorProtein(pSILAC_object, 
+                        metric = "kdeg", 
+                        method = "spearman", 
+                        use = "pairwise.complete.obs")
 ```
 
 ### Plot protein summary
@@ -543,7 +724,8 @@ KdeggeR::plotProteinHol(pSILAC_object, protein = "O75208")
 Plots both RIA-based and ln(H/L +1)-based protein k_loss fit and peptide-level k_loss distribution as boxplots. 
 
 ```{r, fig.dim=c(10,10), eval = FALSE}
-KdeggeR::plotProtein(pSILAC_object, protein = "O75208")
+KdeggeR::plotProtein(pSILAC_object, 
+                     protein = "O75208")
 ```
 
 # Statistical analysis
@@ -596,7 +778,7 @@ library(limma)
 
 ```{r, eval = FALSE}
 condition_matrix <- data.frame(sample_name = colnames(prot_kdeg)) %>%
-  dplyr::mutate(condition = gsub("_\\d{1}$", "", sample_name))
+  dplyr::mutate(condition = gsub("_\\d{1}.kdeg$", "", sample_name))
 ```
 
 ### Generate design matrix
