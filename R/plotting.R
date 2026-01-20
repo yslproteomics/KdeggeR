@@ -164,16 +164,26 @@ plotMissingValues <- function(x,channel="RIA", ...){
 plotProteinRIA <- function(object, protein, samples=NULL, peptides.alpha=150,plot.legend=T,main=NULL,xlab="Time (hours)",...){
   if(class(object) != "pSILAC")	stop("'object' should be a pSILAC object.")
   if(is.null(object$RIA.kloss))	stop("Peptide-level and protein-level RIA rates of loss must first be calculated. See ?calcAllRates")
+  
   if(is.null(samples)){
+    
     samples <- as.character(unique(object$design$sample))
-  }else{
+  
+    }else{
+    
     if(!all(samples %in% as.character(object$design$sample)))	stop("Unknown samples specified.")
-    samples <- unique(object$design$sample[which(object$design$sample %in% samples)])
+    
+      samples <- unique(object$design$sample[which(object$design$sample %in% samples)])
   }
+  
   w <- which(object$design$sample %in% samples)
+  
   pria <- getPeptides(object, protein=protein, returnValues="RIA")[,w]
+  
   if(is.null(main))	main <- protein
+  
   plot(rep(object$design$time[w],nrow(pria)),as.numeric(t(pria)),col=sapply(rep(object$design$color,nrow(pria)),alpha=peptides.alpha,FUN=maketrans),pch=20,cex=1.5,xlim=c(0,max(object$design$time,na.rm=T)),ylim=c(min(pria,na.rm=T),1),main=main,xlab=xlab,ylab="RIA",...)
+  
   if(protein %in% row.names(object$protein.kloss)){
     f <- function(x,a){ exp(-a*x) }
     for(s in samples){

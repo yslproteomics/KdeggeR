@@ -801,10 +801,10 @@ plotDistributionKlossPeptide <- function(o, c = "lightblue", method = "RIA") {
 #' A `ggplot` object showing the distribution of the selected QC metric per sample.
 #'
 #' @export
-plotQCkLossPeptide <- function(o,
+plotQCklossPeptide <- function(o,
                                c = "lightblue",
                                method = "RIA",
-                               metric = c("kloss.stderr", "kloss.SSR", "R2")) {
+                               metric = "kloss.stderr" ) {
   if (!inherits(o, "pSILAC")) stop("'o' should be a pSILAC object.")
   metric <- match.arg(metric)
   
@@ -937,7 +937,7 @@ plotQCkLossPeptide <- function(o,
 #' A `ggplot` object showing per-sample nbpoints proportions (100 percent stacked bars).
 #'
 #' @export
-plotQCkLossPeptideNbpoints <- function(o, method = "RIA") {
+plotQCklossPeptideNbpoints <- function(o, method = "RIA") {
   if (!inherits(o, "pSILAC")) stop("'o' should be a pSILAC object.")
   
   dat <- if (method == "RIA") {
@@ -1033,7 +1033,7 @@ plotQCkLossPeptideNbpoints <- function(o, method = "RIA") {
 #' A `ggplot` object showing per-sample proportions of binned R2 (100 percent stacked bars).
 #'
 #' @export
-plotQCkLossPeptideR2Binned <- function(o) {
+plotQCklossPeptideR2Binned <- function(o) {
   if (!inherits(o, "pSILAC")) stop("'o' should be a pSILAC object.")
   if (is.null(o$hol.kloss)) stop("'o$hol.kloss' is NULL; no HoL QC data to plot.")
   if (ncol(o$hol.kloss) == 0L || nrow(o$hol.kloss) == 0L) stop("'o$hol.kloss' has zero rows or columns.")
@@ -1492,7 +1492,7 @@ plotDistributionHalflifeProtein <- function(o, c = "lightyellow") {
 #' @importFrom corrplot corrplot
 #' @export
 plotCorProtein <- function(o,
-                           metric = c("kloss", "kdeg", "halflife"),
+                           metric = "kloss",
                            method = "spearman",
                            use = "pairwise.complete.obs",
                            ...) {

@@ -6,7 +6,7 @@
 \usage{
 plotCorProtein(
   o,
-  metric = c("kloss", "kdeg", "halflife"),
+  metric = "kloss",
   method = "spearman",
   use = "pairwise.complete.obs",
   ...
