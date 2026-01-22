@@ -10,13 +10,12 @@
 "example_kcd"
 
 
-#' @title Example output from a demo pSILAC analysis
+#' @title Example pSILAC object
 #'
 #' @description
-#' An example \code{pSILAC} object generated from the demo analysis workflow,
-#' containing precursor- and protein-level turnover rate estimates.
+#' An example \code{pSILAC} object, containing precursor- and protein-level turnover rate estimates.
 #'
 #' @format
 #' A \code{pSILAC} class object with fitted turnover parameters and
 #' associated quality-control metrics.
-"example_spectronaut_pSILAC_object"
+"example_pSILAC_object"
