@@ -4,7 +4,12 @@
 \alias{plotQCklossPeptide}
 \title{Plot peptide-level k_loss QC metrics per sample}
 \usage{
-plotQCklossPeptide(o, c = "lightblue", method = "RIA", metric = "kloss.stderr")
+plotQCklossPeptide(
+  o,
+  c = "lightblue",
+  method = c("RIA", "hol", "NLI"),
+  metric = c("kloss.stderr", "kloss.SSR", "R2")
+)
 }
 \arguments{
 \item{o}{A `pSILAC` object. The function expects one of `o$RIA.kloss`, `o$hol.kloss`,

@@ -801,22 +801,21 @@ plotDistributionKlossPeptide <- function(o, c = "lightblue", method = "RIA") {
 #' A `ggplot` object showing the distribution of the selected QC metric per sample.
 #'
 #' @export
-plotQCklossPeptide <- function(o,
-                               c = "lightblue",
-                               method = "RIA",
-                               metric = "kloss.stderr" ) {
+plotQCklossPeptide <- function(o, c = "lightblue", 
+                               method = c("RIA", "hol", "NLI"),
+                               metric = c("kloss.stderr", "kloss.SSR", "R2") ) {
+  
   if (!inherits(o, "pSILAC")) stop("'o' should be a pSILAC object.")
+  
+  method <- match.arg(method)
   metric <- match.arg(metric)
   
-  dat <- if (method == "RIA") {
-    o$RIA.kloss
-  } else if (method == "hol") {
-    o$hol.kloss
-  } else if (method == "NLI") {
-    o$NLI.kloss
-  } else {
-    stop("Invalid method. Choose 'RIA', 'hol', or 'NLI'.")
-  }
+  dat <- switch(
+    method,
+    RIA = o$RIA.kloss,
+    hol = o$hol.kloss,
+    NLI = o$NLI.kloss
+  )
   
   if (is.null(dat)) stop(paste0("'o$", method, ".kloss' is NULL; no peptide QC data to plot."))
   if (ncol(dat) == 0L || nrow(dat) == 0L) stop(paste0("'o$", method, ".kloss' has zero rows or columns."))
