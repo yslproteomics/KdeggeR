@@ -99,7 +99,7 @@ KdeggeR::example_spectronaut_design_replicates %>%
 See the example output pSILAC object. 
 
 ```{r}
-KdeggeR::example_spectronaut_pSILAC_object %>% 
+KdeggeR::example_pSILAC_object %>% 
   View()
 ```
 
