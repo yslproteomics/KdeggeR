@@ -3,14 +3,16 @@
 \docType{data}
 \name{example_spectronaut_pSILAC_object}
 \alias{example_spectronaut_pSILAC_object}
-\title{Example Output from the demo analysis}
+\title{Example output from a demo pSILAC analysis}
 \format{
-An object of class \code{pSILAC} of length 18.
+A \code{pSILAC} class object with fitted turnover parameters and
+associated quality-control metrics.
 }
 \usage{
 example_spectronaut_pSILAC_object
 }
 \description{
-This file is a pSILAc class object with all precursor and protein-level rates estimated.
+An example \code{pSILAC} object generated from the demo analysis workflow,
+containing precursor- and protein-level turnover rate estimates.
 }
 \keyword{datasets}

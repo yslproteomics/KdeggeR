@@ -3,14 +3,16 @@
 \docType{data}
 \name{example_kcd}
 \alias{example_kcd}
-\title{Example Kcd file}
+\title{Example Kcd dataset}
 \format{
-An object of class \code{data.frame} with 6 rows and 2 columns.
+A data frame containing Kcd estimates suitable for downstream analysis
+and visualization.
 }
 \usage{
 example_kcd
 }
 \description{
-This file contains Kcd values of the A2780 and A2780Cis cell lines.
+An example dataset containing Kcd values estimated for the A2780 parental
+and A2780Cis cell lines.
 }
 \keyword{datasets}
